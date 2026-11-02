@@ -1,0 +1,23 @@
+{
+  "version": "0.8.4 R4",
+  "VRM_unchanged": true,
+  "VRM_sha256": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "clips_total": 14,
+  "unchanged_clips": 12,
+  "walking_in_place": {
+    "file": "Walking in place.fbx",
+    "seconds": 1.366667,
+    "bones": 155,
+    "net_root_travel_m": -2e-06
+  },
+  "walking_forward": {
+    "file": "Walking adelante.fbx",
+    "seconds": 1.366667,
+    "bones": 155,
+    "distance_m": 1.4744,
+    "root_translate_source": "FBX model LUMIA_FULL_SKIN_1 / Lcl Translation Z"
+  },
+  "control_speed": "35%-150%, unchanged",
+  "root_movement": "one cycle, camera follow and manual reset",
+  "validation_limit": "browser 3D not yet visually checked"
+}

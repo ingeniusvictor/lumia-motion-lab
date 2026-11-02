@@ -1,0 +1,11 @@
+L.U.M.I.A. MOTION v0.8.5 R7 - GESTOS SEMANTICOS
+
+1. Extrae esta carpeta completa.
+2. Ejecuta ABRIR_LUMIA_V085_R7_GESTOS_SEMANTICOS.bat
+3. Mantén abierta la ventana negra del servidor.
+4. Se abrirá el navegador en el puerto 8787 u otro disponible.
+5. En Motion Intelligence R7, prueba Sí / No / Explicar / Celebración.
+6. Conserva R6 como respaldo aprobado. Los 17 FBX, el VRM y el compositor son idénticos.
+
+El navegador debe tener conexión a internet para descargar las dependencias Three.js y three-vrm del CDN.
+Si los movimientos semánticos no te gustan, desactiva su casilla y todo queda como en R6.

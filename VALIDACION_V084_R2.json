@@ -1,0 +1,25 @@
+{
+  "build": "v0.8.4 R2 \u2014 Motion Library Speed",
+  "source_kit": "/mnt/data/LUMIA_VITA_NATURAL_V084_MOTION_LIBRARY_KIT",
+  "vrm_untouched": true,
+  "all_original_fbx_untouched": true,
+  "source_sha256": {
+    "LUMIA_VITA_NATURAL_V05.vrm": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+    "Waving.fbx": "33ce3315242e261fe83b261422e9afba3e8e12c6c43fbad6b477df0cbef0f263",
+    "Talking.fbx": "5462cf98598274c8e3325d7dd72293e79ecfd81b9cd155ab7e34de7a6a6ee318",
+    "Dwarf Idle.fbx": "74a1185528d4fa81c518e33c59d11bee6466195df23e7dedc8fc5862926373f3"
+  },
+  "new_sha256": {
+    "LUMIA_VITA_NATURAL_V05.vrm": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+    "Waving.fbx": "33ce3315242e261fe83b261422e9afba3e8e12c6c43fbad6b477df0cbef0f263",
+    "Talking.fbx": "5462cf98598274c8e3325d7dd72293e79ecfd81b9cd155ab7e34de7a6a6ee318",
+    "Dwarf Idle.fbx": "74a1185528d4fa81c518e33c59d11bee6466195df23e7dedc8fc5862926373f3"
+  },
+  "controls": {
+    "min_speed": 0.35,
+    "max_speed": 1.5,
+    "default_speed": 0.7,
+    "live_update": true
+  },
+  "notes": "Talking original included, replacement awaits user-supplied new FBX."
+}

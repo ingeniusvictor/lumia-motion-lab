@@ -1,0 +1,31 @@
+{
+  "version": "0.8.5",
+  "package": "LUMIA MOTION - Motion Intelligence",
+  "date": "2026-11-01",
+  "source_base": "LUMIA VITA NATURAL v0.8.4 R5",
+  "clips": 15,
+  "baseline_vrm_sha256": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "new_vrm_sha256": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "fbx_unchanged": true,
+  "trajectory_data_unchanged": true,
+  "tests": "All Node.js test-*.mjs passed; syntax checked for .js and .mjs",
+  "browser_qa": "not completed; local navigation was blocked by Chromium administrator in this runtime",
+  "new_ui": [
+    "Motion Intelligence on/off",
+    "Variety slider 0..100%",
+    "Auto gesture status"
+  ],
+  "preserved": [
+    "15 FBX clips",
+    "VRM v0.5",
+    "35%-150% FBX speed",
+    "voice, visemes, expressions",
+    "manual controls",
+    "3 walking modes"
+  ],
+  "new_files": [
+    "motion-intelligence.js",
+    "test-motion-intelligence.mjs",
+    "test-v085-integration.mjs"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "version": "LUMIA 0.8.4 experimental",
+  "source": "0.8.3 / VRM v0.5 visually approved",
+  "vrm_sha256": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "fbx_with_skin": [
+    {
+      "file": "Waving.fbx",
+      "size_mib": 1.296,
+      "sha256": "33ce3315242e261fe83b261422e9afba3e8e12c6c43fbad6b477df0cbef0f263",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 8727,
+      "duration_s": 0.633
+    },
+    {
+      "file": "Talking.fbx",
+      "size_mib": 2.021,
+      "sha256": "5462cf98598274c8e3325d7dd72293e79ecfd81b9cd155ab7e34de7a6a6ee318",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 91068,
+      "duration_s": 5.933
+    },
+    {
+      "file": "Dwarf Idle.fbx",
+      "size_mib": 1.819,
+      "sha256": "74a1185528d4fa81c518e33c59d11bee6466195df23e7dedc8fc5862926373f3",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 68124,
+      "duration_s": 4.433
+    }
+  ],
+  "retarget": "J_Bip_* => normalized VRM humanoid upper body incl. fingers",
+  "visual_validation": "pending user browser test",
+  "preinstalled_clips": [
+    "Waving.fbx",
+    "Talking.fbx",
+    "Dwarf Idle.fbx"
+  ],
+  "fbx_originals_unchanged": true
+}

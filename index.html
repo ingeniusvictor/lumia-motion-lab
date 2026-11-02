@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LUMIA MOTION v0.8.5 R8 — Natural Conversation Motion</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,Segoe UI,Arial,sans-serif;background:#081321;color:#e1f4fb}*{box-sizing:border-box}body{margin:0}
+main{height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) 364px}#view{position:relative;min-height:320px;overflow:hidden;background:radial-gradient(circle at 50% 36%,#143c51 0%,#101f34 46%,#08101c 100%)}canvas{display:block}
+#status{position:absolute;top:18px;left:18px;padding:12px 16px;border:1px solid #285368;border-radius:12px;max-width:min(400px,90%);background:#091523d9;pointer-events:none}.tag{color:#68e7fa;font-size:11px;text-transform:uppercase;letter-spacing:1.6px;font-weight:700}.status-line{font-size:13px;margin-top:6px}.substatus{font-size:11px;color:#92b2c1;margin-top:5px}
+aside{border-left:1px solid #244458;background:#0f1d2d;padding:20px;overflow:auto}h1{font-size:20px;margin:6px 0}p{margin:8px 0;font-size:12.5px;color:#a2bfcb;line-height:1.5}h2{font-size:14px;color:#f0fbff;margin:0 0 11px}section{margin-top:18px;padding-top:17px;border-top:1px solid #284456}#library-panel h3{font-size:12px;color:#72e9f3;margin:17px 0 9px}#library-panel .actions.triple button{font-size:11px;min-height:43px;padding:7px 4px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions.triple{grid-template-columns:repeat(3,1fr)}button{font-family:inherit;padding:10px 8px;background:#153148;border:1px solid #315d73;border-radius:9px;color:#c9e6f0;font-size:12px;cursor:pointer;min-height:37px}button:hover{border-color:#52cde7}button.active{background:#10607b;border-color:#59e9f7;color:white}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #68e7fa;outline-offset:2px}
+label{display:block;color:#b9d7e0;font-size:12.5px;margin:12px 0 9px}label span{float:right;color:#72effb}input[type=range]{width:100%;margin:6px 0;accent-color:#5fe4f2}small{display:block;font-size:11px;color:#8da5b5;line-height:1.55;margin-top:9px}#manual-controls[hidden],#pointer-hint[hidden]{display:none}
+.info{padding:11px 13px;border:1px solid #28536b;border-radius:9px;background:#0b2537;font-size:12px;color:#acd4e0;margin-top:10px}
+@media(max-width:820px){main{height:auto;display:flex;flex-direction:column}#view{height:57dvh;min-height:320px}aside{border-left:0;border-top:1px solid #244458;max-height:none}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+.convo-label{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.convo-badge{color:#8af1ff;font-size:11px;font-weight:700;padding:5px 9px;background:#0c354b;border-radius:20px;border:1px solid #2a657a}
+.chat-history{min-height:110px;max-height:245px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:12px;background:#0a1725;border:1px solid #2b4a5d;border-radius:10px;margin-bottom:10px}
+.chat-bubble{border-radius:10px;padding:9px 11px;line-height:1.5;font-size:12px;overflow-wrap:anywhere}
+.chat-bubble strong{display:block;font-size:11px;margin-bottom:3px;color:#7eeaf5}
+.chat-user{background:#17364b;align-self:flex-end;max-width:92%}
+.chat-assistant{background:#132536;border:1px solid #294b62;align-self:flex-start;max-width:95%}
+#chat-input{resize:vertical;min-height:56px;width:100%;background:#0b1c2b;border:1px solid #34546a;border-radius:10px;color:#e0f7ff;padding:10px;font:inherit;font-size:13px}
+#backend-mode{width:100%;background:#10273a;border:1px solid #315d73;border-radius:8px;color:#dff7ff;padding:9px;font:inherit;font-size:12px}
+.convo-check{display:flex;align-items:center;gap:9px;margin:11px 0}.convo-check input{accent-color:#5fe4f2}.convo-check span{float:none}
+#conversation-status{font-size:11.5px;color:#a5d1dc;line-height:1.5;padding:8px 10px;background:#0c2334;border-radius:8px;margin-top:10px}
+#conversation-status[data-state="thinking"]{color:#f5d78b}#conversation-status[data-state="speaking"]{color:#75f3d8}
+</style>
+<script type="importmap">{"imports":{
+ "fflate":"https://cdn.jsdelivr.net/npm/fflate@0.7.4/esm/browser.js",
+ "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+ "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+ "@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"
+}}</script>
+</head>
+<body><main>
+<div id="view"><div id="status"><div class="tag">LUMIA · Motion Intelligence v0.8.5 R8 — Natural Conversation</div><div id="status-text" class="status-line">Cargando avatar VRM…</div><div id="runtime-state" class="substatus">Iniciando controles naturales</div></div></div>
+<aside>
+<div class="tag">Avatar aprobado: Natural v0.5</div>
+<h1>Movimiento corporal, voz y emociones</h1>
+<p>Base visual aprobada intacta. Ahora Lumia articula palabras de forma estimada, modula expresiones durante sus respuestas y recibe marcas de visemas del TTS de tu aplicación.</p>
+<div class="info" id="motion-state">Estado actual: En reposo</div>
+
+<section id="conversation-panel"><div class="convo-label"><h2>Conversación en vivo</h2><span class="convo-badge" id="conversation-mode">En reposo</span></div>
+<p>Prueba el ciclo automático <strong>escuchar → pensar → hablar → reposo</strong>. Para activar la IA real hace falta conectar su motor; el modo demo es local.</p>
+<label for="backend-mode">Fuente de respuestas</label>
+<select id="backend-mode"><option value="demo" selected>Demostración local (sin IA)</option><option value="api">API real del mismo servidor (/api/lumia/chat)</option></select>
+<div id="conversation-history" class="chat-history" role="log" aria-live="polite"><div class="chat-bubble chat-assistant"><strong>Lumia</strong><div>¡Hola! Ya puedo acompañar una conversación con mis movimientos. Puedes escribirme o activar el micrófono.</div></div></div>
+<label for="chat-input">Escribe un mensaje para Lumia</label>
+<textarea id="chat-input" rows="2" maxlength="1500" placeholder="Hola Lumia, ¿cómo estás?"></textarea>
+<div class="actions"><button id="send-chat">Enviar mensaje</button><button id="microphone">🎙 Escuchar</button></div>
+<label class="convo-check" for="speak-replies"><input id="speak-replies" type="checkbox" checked><span>Leer las respuestas con la voz del navegador</span></label>
+<label class="convo-check" for="auto-emotion"><input id="auto-emotion" type="checkbox" checked><span>Expresiones contextuales automáticas (se pueden anular manualmente)</span></label>
+<div id="auto-emotion-state" class="info" aria-live="polite">Expresión sugerida: neutral</div>
+<label for="audio-file">Prueba opcional: audio local (WAV, MP3, etc.)</label>
+<input id="audio-file" type="file" accept="audio/*" style="max-width:100%;font-size:12px;margin:6px 0 8px"><audio id="sample-audio" controls hidden style="width:100%;margin:4px 0 10px"></audio>
+<small>El audio local mueve la boca según su amplitud real; no identifica fonemas. Un motor TTS externo puede enviar marcas temporales de visemas para articulación más precisa.</small>
+<button id="stop-conversation" style="width:100%">Detener / volver al reposo</button>
+<div id="conversation-status" role="status">Preparando integración conversacional…</div>
+<small>Micrófono: Web Speech API con permisos. Voz: SpeechSynthesis. La boca usa texto y límites de palabra estimados, NO fonemas exactos. Para articulación fonética precisa: marcas temporales reales de tu TTS. El modo local no utiliza IA.</small>
+</section>
+<section><h2>Estados conversacionales</h2>
+<div class="actions" id="behavior-select">
+<button data-behavior="idle" class="active" aria-pressed="true">◯ Reposo</button>
+<button data-behavior="listening" aria-pressed="false">◉ Escuchando</button>
+<button data-behavior="thinking" aria-pressed="false">✦ Pensando</button>
+<button data-behavior="speaking" aria-pressed="false">▰ Hablando</button>
+</div>
+<div class="info" id="behavior-description">Observa el entorno, parpadea y respira visualmente con gestos mínimos.</div>
+<div class="actions"><button id="cycle-states" aria-pressed="false">Demo: recorrer estados</button><button id="look-up">Prueba: mirar arriba</button></div>
+<small>Los botones manuales y la demo de estados siguen disponibles; durante una conversación, los estados cambian automáticamente.</small></section>
+<section id="intelligence-panel"><h2>🧠 Motion Intelligence · gestos automáticos</h2>
+<p>El director selecciona movimientos según si Lumia escucha, reflexiona o habla, con estabilización al cambiar de estado. No necesita que pulses los botones y respeta siempre el control manual.</p>
+<label class="convo-check"><input type="checkbox" id="intelligence-enabled" checked><span>Activar selección inteligente de animaciones</span></label>
+<label class="convo-check"><input type="checkbox" id="intelligence-auto-idle" checked><span>Nuevo Idle automático solo en Reposo (recomendado)</span></label>
+<small>Reposo utiliza el nuevo Idle, como seleccionaste. Escuchando ahora usa exclusivamente Head Gesture.fbx (5,60 s), con un movimiento propio de cabeza y cuerpo.</small>
+<div class="info" style="margin-top:14px"><strong>💓 Presencia Viva · Reposo y Escuchando</strong><small>En Reposo complementan el nuevo Idle; en Escuchando complementan Head Gesture con gestos discretos, sin copiar Idle.</small></div>
+<label class="convo-check"><input type="checkbox" id="presence-enabled" checked><span>Activar respiración y escucha expresiva</span></label>
+<label for="presence-idle">Vida en reposo <span id="presence-idle-label">65%</span></label>
+<input id="presence-idle" type="range" min="0" max="100" step="5" value="65" aria-label="Intensidad de presencia viva en reposo">
+<label for="presence-listening">Atención al escuchar <span id="presence-listening-label">80%</span></label>
+<input id="presence-listening" type="range" min="0" max="100" step="5" value="80" aria-label="Intensidad de gestos de atención al escuchar">
+<div class="info" id="presence-status" aria-live="polite">Presencia activa: reposo y escucha.</div>
+<small>Estas barras son independientes de la velocidad de Mixamo: afectan solo al movimiento natural durante reposo y escucha; no cambian los FBX, la voz ni los visemas.</small>
+<div class="info" style="margin-top:14px"><strong>🗣️ Motion Intelligence R7 · Significado de la respuesta</strong><small>El cuerpo acompaña palabras de afirmación, negación, explicación, alegría o empatía sin interrumpir el FBX Talking. Gestos sutiles por encima del movimiento existente.</small></div>
+<label class="convo-check"><input type="checkbox" id="semantic-enabled" checked><span>Gestos semánticos suaves (recomendado)</span></label>
+<label for="semantic-intensity">Intensidad de gesto semántico <span id="semantic-intensity-label">48%</span></label>
+<input id="semantic-intensity" type="range" min="0" max="100" step="5" value="48" aria-label="Intensidad de gestos semánticos suaves">
+<div class="actions triple" style="margin-top:7px"><button data-semantic-demo="affirm">Probar Sí</button><button data-semantic-demo="deny">Probar No</button><button data-semantic-demo="explain">Explicar</button></div>
+<div class="actions"><button data-semantic-demo="celebrate">Probar celebración</button></div>
+<div class="info" id="semantic-status" aria-live="polite">Esperando voz · el texto de la respuesta activará los gestos</div>
+<small>Solo se aplican mientras Lumia está hablando mediante TTS (o con señales explícitas de un TTS externo). Máximo tres gestos discretos por respuesta, con separación temporal. Si el navegador no informa los límites de palabra, su momento se aproxima por tiempo. El compositor de baile y las animaciones manuales conservan prioridad.</small>
+<label for="intelligence-thinking-delay">Espera antes de gesticular al pensar <span id="intelligence-thinking-delay-label">0,65 s</span></label>
+<input id="intelligence-thinking-delay" type="range" min="0" max="1.5" step="0.05" value="0.65" aria-label="Retraso para iniciar el gesto Pensando">
+<label class="convo-check"><input type="checkbox" id="intelligence-talk-accents"><span>Permitir interrumpir Talking con otros gestos (experimental)</span></label>
+<small>DESACTIVADO de forma predeterminada: mantiene Talking fluido durante su ciclo, sin saltar a pose base para cambiar de gesto. La variedad se aplica solo si activas la opción experimental.</small>
+<label for="intelligence-variety">Variedad de gestos <span id="intelligence-variety-label">55%</span></label>
+<input id="intelligence-variety" type="range" min="0" max="100" step="5" value="55" aria-label="Variedad y frecuencia de gestos automáticos">
+<div class="info" id="intelligence-status" aria-live="polite">Director activo · esperando conversación</div>
+<small>Reposo: Idle nuevo automático · Escuchando: Head Gesture FBX dedicado · Pensando: clip con estabilizador de microtirones · Hablando: Talking sin interrupciones por defecto. El paseo circular solo ocurre si activas su casilla, abajo. La barra FBX controla la velocidad independientemente.</small>
+<small><strong>Prueba sugerida:</strong> pulsa «Demo: recorrer estados» o escribe un mensaje y escucha la respuesta. Pulsa cualquier animación manual para tomar el control. «Detener» devuelve el control al director.</small>
+</section>
+<section id="r8-sync-panel"><h2>🔄 R8 · Coordinación de conversación y voz</h2>
+<p>La escucha, el pensamiento y el movimiento al hablar siguen el estado real de la conversación. La voz externa dispone ahora de sesiones identificadas para evitar cierres atrasados.</p>
+<label class="convo-check" for="r8-pose-blend"><input type="checkbox" id="r8-pose-blend" checked><span>Suavizar cambio entre clips corporales (recomendado)</span></label>
+<div class="info" id="r8-voice-status" aria-live="polite">Sin eventos de voz</div>
+<small>Puente de pose de 0,44 segundos entre dos FBX. No altera los archivos originales, las expresiones, los visemas, las caminatas ni el compositor. Para una IA externa, la voz debe informar el comienzo real de la reproducción, progreso de palabras si está disponible y final/interrupción.</small>
+</section>
+<section id="stability-panel"><h2>🛡 Estabilidad de animaciones · R6</h2>
+<label class="convo-check"><input type="checkbox" id="stability-thinking"><span>Corrección adicional de microtirones de Thinking (normalmente innecesaria)</span></label>
+<div class="info" id="stability-status" aria-live="polite">Estabilizador disponible · no altera los FBX originales</div>
+<small>El Thinking anterior tenía cuatro saltos de curvas superiores a 25° en menos de 12 ms. El Thinking nuevo (4,70 s) no presenta ninguno. Por eso dejamos la corrección desactivada por defecto; se conserva como herramienta opcional.</small>
+</section>
+<section id="library-panel"><h2>LUMIA Motion Library · 17 animaciones</h2>
+<p>Nuevo Idle (20,93 s) sigue como reposo automático; Head Gesture (5,60 s) anima Escuchando. El antiguo Dwarf Idle queda como «Revisar las manos». Nuevo Thinking (4,70 s) sin tirones detectados. El compositor de baile ahora es libre, con hasta tres animaciones importadas por el usuario; sin breakdance preinstalado.</p>
+<div class="info" id="motion-clip-detail" aria-live="polite">Selecciona uno de los 17 movimientos para reproducirlo.</div>
+<h3>💬 Conversación y gestos</h3><div class="actions triple" data-motion-group="conversacion"></div>
+<h3>✨ Emociones y reacciones</h3><div class="actions triple" data-motion-group="emociones"></div>
+<h3>🚶 Caminatas</h3><div class="actions triple" data-motion-group="movimiento"></div>
+<h3>🎶 Compositor de baile · 1 a 3 movimientos</h3>
+<p>Biblioteca de baile vacía por defecto. Importa los FBX que prefieras (breakdance, salsa, bachata, merengue u otros) y escoge exactamente el orden: primero 1, después 2 y finalmente 3. Puedes dejar vacíos los últimos pasos.</p>
+<div id="dance-sequence-panel" class="info" style="margin:10px 0 14px;padding:13px;border:1px solid #3f7890;border-radius:12px">
+<strong>🎵 Mi coreografía personalizada</strong>
+<label for="dance-files">Añadir animaciones de baile (.fbx, múltiples archivos)</label>
+<input type="file" id="dance-files" accept=".fbx" multiple style="max-width:100%;font-size:12px" />
+<div class="info" id="dance-library-status" aria-live="polite">No hay bailes instalados. Selecciona uno o más archivos FBX para comenzar.</div>
+<div class="actions" style="margin-top:8px"><button type="button" id="dance-clear-steps">Limpiar pasos</button><button type="button" id="dance-clear-library">Quitar bailes cargados</button></div>
+<label for="dance-step-1">1 · Inicio</label>
+<select id="dance-step-1" class="dance-step" aria-label="Primer movimiento de baile" style="width:100%;background:#142b3c;color:#e5faff;border:1px solid #447486;border-radius:7px;padding:9px"></select>
+<label for="dance-step-2">2 · Desarrollo (opcional)</label>
+<select id="dance-step-2" class="dance-step" aria-label="Segundo movimiento de baile" style="width:100%;background:#142b3c;color:#e5faff;border:1px solid #447486;border-radius:7px;padding:9px"></select>
+<label for="dance-step-3">3 · Final (opcional)</label>
+<select id="dance-step-3" class="dance-step" aria-label="Tercer movimiento de baile" style="width:100%;background:#142b3c;color:#e5faff;border:1px solid #447486;border-radius:7px;padding:9px"></select>
+<div id="dance-order-preview" class="info" aria-live="polite">Orden: todavía no hay pasos seleccionados.</div>
+<label for="dance-blend">Suavidad del empalme <span id="dance-blend-label">0,38 s</span></label>
+<input type="range" id="dance-blend" min="0.1" max="0.7" value="0.38" step="0.02" aria-label="Segundos de superposición entre movimientos" />
+<div class="actions triple" style="margin-top:10px"><button id="dance-start" disabled>▶ Iniciar baile</button><button id="dance-pause" disabled>⏸ Pausar</button><button id="dance-stop" disabled>■ Detener</button></div>
+<div class="info" id="dance-sequence-status" role="status">Importa movimientos, asigna los pasos 1–3 y pulsa Iniciar baile.</div>
+<small>Los FBX importados permanecen solo en esta sesión del navegador; vuelve a seleccionarlos al abrir de nuevo. No se suben a internet. La velocidad general de animación y el empalme se aplican a la secuencia. No se incluye ningún FBX de breakdance en el kit.</small>
+</div>
+
+<div class="actions" style="margin-top:9px"><button id="walk-reset">Volver al punto de partida</button><label class="convo-check" style="margin:0;align-self:center"><input type="checkbox" id="walk-camera-follow" checked><span>Seguir con cámara</span></label></div>
+<small>Caminar hacia delante avanza aproximadamente 1,47 m; el nuevo Paseo circular sigue la trayectoria X/Z y gira el personaje, describiendo una vuelta ovalada de aproximadamente 2,2 × 4,4 m en 12,53 s (a velocidad 100%). Es experimental: comprueba la pisada y la dirección.</small>
+<label class="convo-check"><input type="checkbox" id="walk-auto-thinking"><span>Iniciar paseo circular tras 4 s en estado Pensando (experimental)</span></label>
+<small>Por defecto esta opción está desactivada. El paseo manual ejecuta un círculo completo; si se interrumpe, Lumia conserva su posición hasta pulsar «Volver al punto de partida».</small>
+<label for="mixamo-speed">Velocidad de animaciones FBX <span id="mixamo-speed-label">70%</span></label>
+<input id="mixamo-speed" type="range" min="0.35" max="1.5" value="0.7" step="0.05" aria-label="Velocidad de las animaciones de Mixamo" />
+<div class="actions triple" style="margin-top:7px"><button data-mixamo-speed="0.5">50% · lenta</button><button data-mixamo-speed="0.75">75% · natural</button><button data-mixamo-speed="1">100% · Mixamo</button></div>
+<small id="mixamo-speed-duration">Carga un clip para ver su duración ajustada.</small>
+<small>Control en tiempo real de <strong>35% a 150%</strong> para todos los FBX; no acelera voz, labios, ojos ni expresiones. Los clips se cargan al seleccionarlos y quedan en caché.</small>
+<label class="convo-check"><input type="checkbox" id="library-auto-talk"><span>Modo legado: Talking automático si desactivas Motion Intelligence</span></label>
+<small>Saludar repite dos veces; Aplaudir, tres. Talking, Idle nuevo y Caminar en sitio se reproducen en bucle. Caminar hacia delante reproduce un ciclo y recorre aproximadamente 1,47 m, con seguimiento opcional de cámara. El estado de reposo vuelve gradualmente tras detener un clip. El círculo también orienta a Lumia en dirección de su trayecto y respeta la velocidad FBX.</small>
+</section>
+<section id="mixamo-panel"><h2>Animaciones humanas · Motion Library v0.8.5</h2>
+<p>Importa un clip FBX descargado desde Mixamo para probar gestos con hombro, codo, muñeca y dedos coordinados. Lumia conserva rostro, mirada, voz y el VRM original.</p>
+<label for="mixamo-file">Animación Mixamo adicional (.fbx, With o Without Skin)</label>
+<input type="file" id="mixamo-file" accept=".fbx" style="max-width:100%;font-size:12px" />
+<div class="actions" style="margin-top:11px"><button id="mixamo-play" disabled>Reproducir gesto FBX</button><button id="mixamo-stop">Detener / reposo</button></div>
+<div class="info" id="mixamo-status" role="status">Incluidas: 17 animaciones aprobadas. Los bailes nuevos se importan en el compositor.</div>
+<small>Para agregar otros clips, descarga en <a href="https://www.mixamo.com/" target="_blank" rel="noopener" style="color:#78eafa">Mixamo</a>: Animation → Download → FBX Binary → Without Skin → 30 FPS (In Place si aplica). Gesto recomendado: saludo/wave. Para señalar o asentir, prueba otros clips, con los límites naturales de cada animación.</small>
+<small>Este laboratorio adapta brazos, torso y dedos; Los tres clips de caminata incluyen piernas; el avance lineal y el paseo circular aplican las trayectorias reales de la raíz del FBX sobre el avatar. No reemplaza la cabeza ni la voz. Importación con nombres J_Bip_* adaptada; evaluación visual definitiva pendiente en tu PC.</small>
+</section><section id="body-motion-panel"><h2>Movimiento corporal procedimental · anterior</h2>
+<p>Desactiva la pose T para que Lumia relaje los brazos. Los gestos anteriores siguen disponibles para comparación. Para movimientos humanos más realistas utiliza la sección Mixamo Lab.</p>
+<div class="actions"><button id="toggle-body" class="active" aria-pressed="true">Animación corporal</button><button id="body-wave">Saludar con la mano</button><button id="body-explain">Explicar con brazos</button><button id="body-point">Señalar al frente</button><button id="body-welcome">Dar bienvenida</button><button data-camera="full">Ver cuerpo entero</button></div>
+<label>Postura de los brazos</label><div class="actions triple"><button data-body-pose="natural" class="active">Natural</button><button data-body-pose="formal">Formal</button><button data-body-pose="open">Abierta</button></div>
+<div class="actions"><button data-body-pose="tpose">Pose T original</button><button data-camera="quarter">Ver 3/4</button></div>
+<label for="body-intensity">Expresividad corporal <span id="body-intensity-label">60%</span></label><input id="body-intensity" type="range" min="0" max="100" value="60" step="1">
+<label for="body-speed">Suavizado de gestos <span id="body-speed-label">5.0/s</span></label><input id="body-speed" type="range" min="1.5" max="11" value="5" step="0.5">
+<label for="body-depth">Profundidad hombros y codos <span id="body-depth-label">75%</span></label><input id="body-depth" type="range" min="0" max="125" value="75" step="1">
+<label for="body-wrist">Expresividad de muñecas <span id="body-wrist-label">75%</span></label><input id="body-wrist" type="range" min="0" max="125" value="75" step="1">
+<div class="actions"><button id="body-depth-invert" aria-pressed="false">Invertir profundidad</button><button data-camera="quarter">Comprobar vista 3/4</button></div>
+<small>Los codos se flexionan principalmente como bisagra; las rotaciones combinadas de hombro y antebrazo aportan profundidad. Si un gesto aparece hacia atrás, utiliza «Invertir profundidad».</small>
+<div class="info" id="body-availability">Esperando carga del esqueleto humanoide...</div>
+<small>El movimiento es procedimental, sin clips de caminar. Los pies permanecen apoyados; no se simula marcha, agarre ni colisiones. Esta revisión no modifica el VRM.</small>
+</section>
+<section><h2>Movimiento natural</h2><div class="actions"><button id="toggle-live" class="active" aria-pressed="true">Animación general</button><button id="toggle-blink" class="active" aria-pressed="true">Parpadeo natural</button><button id="toggle-gaze" class="active" aria-pressed="true">Mirada suave</button><button id="toggle-head" class="active" aria-pressed="true">Movimiento cabeza</button><button id="toggle-expression" class="active" aria-pressed="true">Neutral vivo</button><button id="manual-blink">Parpadeo de prueba</button></div>
+<label for="intensity">Intensidad general <span id="intensity-label">65%</span></label><input id="intensity" type="range" min="0" max="100" value="65" step="1"><small>El control general modula los gestos de cabeza y el neutral vivo; la mirada ahora se calibra por separado.</small></section>
+<section><h2>Seguimiento de mirada</h2><div class="actions triple"><button class="active" data-gaze-mode="ambient">Ambiente</button><button data-gaze-mode="cursor">Cursor</button><button data-gaze-mode="manual">Manual</button></div>
+<div id="pointer-hint" hidden><small>Mueve el cursor por toda la ventana, incluso hasta la zona superior de la pantalla. Ojos y cabeza lo seguirán con transiciones suaves.</small></div>
+<div id="manual-controls" hidden><label for="gaze-x">Horizontal <span id="gaze-x-label">0%</span></label><input id="gaze-x" type="range" min="-1" max="1" value="0" step="0.01"><label for="gaze-y">Vertical <span id="gaze-y-label">0%</span></label><input id="gaze-y" type="range" min="-1" max="1" value="0" step="0.01"></div>
+<label for="gaze-power">Amplitud de mirada <span id="gaze-power-label">95%</span></label><input id="gaze-power" type="range" min="0.2" max="1.2" value="0.95" step="0.01">
+<label for="gaze-speed">Rapidez de mirada <span id="gaze-speed-label">12.0 /s</span></label><input id="gaze-speed" type="range" min="2" max="20" value="12" step="0.5">
+<label for="head-follow">Cabeza acompaña la mirada <span id="head-follow-label">80%</span></label><input id="head-follow" type="range" min="0" max="1" value="0.80" step="0.01">
+<label for="head-power">Amplitud de cabeza <span id="head-power-label">90%</span></label><input id="head-power" type="range" min="0.2" max="1.4" value="0.90" step="0.01">
+<label for="head-speed">Rapidez de cabeza <span id="head-speed-label">7.5 /s</span></label><input id="head-speed" type="range" min="2" max="14" value="7.5" step="0.5">
+<small>La cabeza gira e inclina más visiblemente para acompañar la mirada. 360° no es recomendable para un movimiento natural.</small>
+<small>En modo Cursor, lleva el puntero hasta el borde superior para comprobar la elevación de la cabeza. La prueba «Mirar arriba» mantiene la mirada alta durante unos segundos.</small></section>
+<section><h2>Expresión de prueba</h2><div class="actions" id="expressions"><button data-emotion="neutral" class="active">Neutral vivo</button><button data-emotion="happy">Alegría</button><button data-emotion="surprised">Sorpresa</button><button data-emotion="angry">Enfado</button><button data-emotion="sad">Tristeza</button><button data-emotion="relaxed">Relajación</button><button data-emotion="curious">Curiosidad</button><button data-emotion="extra">Extra (prueba)</button></div>
+<label for="emotion-intensity">Intensidad expresiva <span id="emotion-intensity-label">70%</span></label><input id="emotion-intensity" type="range" min="0" max="1" value="0.70" step="0.01">
+<small>Las expresiones se funden gradualmente. Curiosidad combina gestos ya existentes; «Extra» es experimental y depende del VRM.</small></section>
+<section><h2>Prueba de vocales (sin audio)</h2><div class="actions triple" id="vowels"><button data-vowel="aa" class="active">A</button><button data-vowel="ee">E</button><button data-vowel="ih">I</button><button data-vowel="oh">O</button><button data-vowel="ou">U</button></div>
+<label for="mouth">Apertura <span id="mouth-value">0%</span></label><input id="mouth" type="range" min="0" max="0.9" value="0" step="0.01"><div class="actions"><button id="talk" aria-pressed="false">Simular habla</button><button data-camera="head">Rostro</button></div><small id="talk-label">Demo vocal desactivada</small><small>Estos botones siguen siendo una demostración. Para conversación con voz utiliza el panel Conversación, que sincroniza los estados con reconocimiento y síntesis de voz del navegador.</small><span id="mouth-name" hidden>A</span></section>
+<section><h2>Vistas</h2><div class="actions"><button data-camera="bust" class="active">Busto</button><button data-camera="full">Cuerpo entero</button><button data-camera="quarter">Tres cuartos</button><button data-camera="head">Primer plano</button></div></section>
+<section><h2>Diagnóstico</h2><p id="details">Esperando archivo VRM...</p><small>Necesita internet para las bibliotecas Three.js/three-vrm. Micrófono y síntesis de voz dependen del navegador, sus permisos y servicios. El modo demostración no envía chats a un backend de IA. API externa solo si la configuras.</small></section>
+</aside></main>
+<script type="module" src="./viewer.js"></script>
+</body></html>

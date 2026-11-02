@@ -1,0 +1,34 @@
+{
+  "version": "0.8.5 R6",
+  "status": "PASS (code/server), visual pending",
+  "active_tests": 16,
+  "tests": {
+    "test-animation-speed.mjs": "PASS",
+    "test-body-motion-3d.mjs": "PASS",
+    "test-conversation.mjs": "PASS",
+    "test-library-catalog.mjs": "PASS",
+    "test-lumia155-map.mjs": "PASS",
+    "test-mixamo-map.mjs": "PASS",
+    "test-motion-intelligence.mjs": "PASS",
+    "test-motion-r6.mjs": "PASS",
+    "test-motion-stability-r1.mjs": "PASS",
+    "test-motion-stability-r3.mjs": "PASS",
+    "test-motion.mjs": "PASS",
+    "test-presencia-viva-r2.mjs": "PASS",
+    "test-v08.mjs": "PASS",
+    "test-v085-integration.mjs": "PASS",
+    "test-walking-circle.mjs": "PASS",
+    "test-walking-forward.mjs": "PASS"
+  },
+  "base_fbx": 17,
+  "breakdance_fbx": 0,
+  "dance_composer_steps_max": 3,
+  "preinstalled_dance_routines": 0,
+  "source_vrm_and_original_17_fbx_unchanged": true,
+  "server_http_200": true,
+  "visual_browser": "NOT RUN: Chromium localhost blocked by administrator",
+  "limitations": [
+    "FBX dance imports stay in browser session",
+    "Root motion and ground contacts not yet supported for dance"
+  ]
+}

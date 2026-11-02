@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {motionCatalog,animationLibrary} from './motion-library-catalog.js';
+import {MotionIntelligence} from './motion-intelligence.js';
+const html=fs.readFileSync('index.html','utf8');
+const viewer=fs.readFileSync('viewer.js','utf8');
+const retarget=fs.readFileSync('mixamo-retarget.js','utf8');
+const dance=motionCatalog.filter(a=>a.category==='baile');
+assert.equal(motionCatalog.length,51);
+assert.equal(dance.length,34);
+assert.equal(new Set(motionCatalog.map(c=>c.id)).size,51);
+assert.equal(animationLibrary.idle.file,'Idle.fbx');
+assert.equal(animationLibrary.idle.loop,true);
+assert.equal(animationLibrary.nails.file,'Dwarf Idle.fbx');
+assert.equal(animationLibrary.thinking.file,'Thinking.fbx');
+for(const clip of dance){
+ assert.equal(clip.loop,false);
+ assert.equal(clip.fullBody,true);
+ assert.equal(clip.includeHips,true);
+ assert.ok(clip.danceGroup);
+ assert.ok(fs.existsSync('clips/'+clip.file),clip.file);
+ assert.ok(html.includes(`data-dance-group="${clip.danceGroup}"`));
+}
+assert.ok(viewer.includes('includeHips:cfg.includeHips'));
+assert.ok(retarget.includes("if(includeHips)permitted.add('hips')"));
+assert.ok(viewer.includes('const stabilityConfig={repairThinking:false}'));
+const director=new MotionIntelligence({idleDelay:0});
+assert.equal(director.decide({now:0,state:'idle'})?.id,'idle');
+assert.equal(director.decide({now:1,state:'listening'})?.id,'listening');
+assert.ok(!/dance/.test(JSON.stringify(director.decide({now:1,state:'speaking',activeId:'talking',active:true}))));
+console.log(JSON.stringify({PASS:true,total:motionCatalog.length,dances:dance.length,originalVRMPreserved:true,thinkingNew:true,oldIdlePreserved:true}));

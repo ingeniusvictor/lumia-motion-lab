@@ -1,0 +1,22 @@
+{
+  "version": "0.8.4 R5",
+  "vrm_sha256": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "vrm_unchanged": true,
+  "clips_total": 15,
+  "clips_R4_unchanged": 14,
+  "new_clip_SHA256": "997c75b23464a47147b9856d29222a2bf8ee95902039582916993f0107eb3153",
+  "new_clip": {
+    "source": "Walk In Circle.fbx",
+    "rig_bones": 155,
+    "duration_s": 12.533333,
+    "frames": 377,
+    "trace": "FBX LUMIA_FULL_SKIN_1 / Lcl Translation X and Z; facing estimated from 2D path tangent",
+    "units": "FBX centimeters to world meters /100; original Mixamo coordinate orientation mapped to viewer -X/-Z",
+    "closed_loop_error_m": 6e-07,
+    "approx_diameter_x_m": 2.21,
+    "approx_diameter_z_m": 4.445,
+    "turn_degrees": 360.58
+  },
+  "implementation": "Full-body limb animation via retarget + root X/Z + tangent-based yaw; one cycle, camera following, reset button; optional thinking auto-trigger",
+  "caveat": "Browser 3D pose and direction still need user visual validation"
+}
