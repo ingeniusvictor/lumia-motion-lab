@@ -1,0 +1,15 @@
+# Assets de terceros no publicables sin permisos
+*.fbx
+*.vrm
+*.glb
+clips/
+*.zip
+*.bundle
+node_modules/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
