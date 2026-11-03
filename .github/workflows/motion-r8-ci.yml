@@ -1,0 +1,45 @@
+name: LUMIA Motion R8 - regression sin assets
+on:
+  pull_request:
+  push:
+    branches:
+      - feat/motion-r8-source-20261101
+
+permissions:
+  contents: read
+
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Tests unitarios y de estructura sin VRM ni FBX
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Node $(node --version)"
+          count=0
+          for test in test-*.mjs; do
+            if [[ "$test" == "test-motion-r6.mjs" ]]; then
+              echo "SKIP $test: requiere clips FBX locales y no publicables"
+              continue
+            fi
+            echo "RUN $test"
+            node "$test"
+            count=$((count+1))
+          done
+          test "$count" -eq 17
+          echo "PASS $count pruebas sin assets"
+      - name: Impedir que entren assets 3D en la rama publica
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -Ei '\.(fbx|vrm|glb|bundle)$'; then
+            echo "ERROR: se detectaron recursos 3D o bundles en el repositorio publico"
+            exit 1
+          fi
+          echo "PASS sin FBX/VRM/GLB/bundles"

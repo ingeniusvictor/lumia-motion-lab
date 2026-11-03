@@ -1,0 +1,19 @@
+L.U.M.I.A. MOTION v0.8.5 R8 — NATURAL CONVERSATION MOTION
+
+1. Este repositorio contiene el CODIGO R8 y los documentos de integracion.
+2. El VRM y los 17 FBX originales NO se incluyen porque el repositorio es publico.
+3. En tu equipo, restaura ambos desde el kit original privado:
+   LUMIA_VITA_NATURAL_V085_R8_NATURAL_CONVERSATION_KIT.zip
+   o usa INSTALAR_ASSETS_LOCALES.ps1 con la carpeta extraida del kit.
+4. En la carpeta del visor, ejecuta ABRIR_LUMIA_V085_R8_CONVERSACION_NATURAL.bat.
+5. Prueba estados, rostro, visemas, Idle, Head Gesture, Thinking y Talking.
+6. La barra de velocidad y el compositor de hasta 3 pasos siguen presentes.
+7. Para pruebas sin assets ejecuta node test-motion-r8.mjs.
+8. Para la certificacion completa se necesita ademas la carpeta clips/ con 17 FBX.
+9. La integracion con el cerebro real del portal original esta PLANIFICADA, no implementada en este kit.
+
+Arquitectura: docs/lumia-convergence/
+Contrato: INTEGRACION_API.md
+Auditoria: docs/qa/CERTIFICACION-MOTION-R8-2026-11-03.md
+
+NO incluyas en commits FBX, VRM, GLB, ZIP o el bundle de respaldo privado.

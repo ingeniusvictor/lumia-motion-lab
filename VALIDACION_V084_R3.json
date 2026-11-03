@@ -1,0 +1,544 @@
+{
+  "build": "v0.8.4 R3 — Motion Library 13",
+  "model_sha256_original": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "model_sha256_new": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "vrm_unchanged": true,
+  "clips_total": 13,
+  "original_kept": [
+    "Waving.fbx",
+    "Dwarf Idle.fbx"
+  ],
+  "talking_replaced_with": "Talking(1).fbx",
+  "original_talking_sha256": "5462cf98598274c8e3325d7dd72293e79ecfd81b9cd155ab7e34de7a6a6ee318",
+  "new_talking_sha256": "705eba737a65f47d8158e1df6f2bb866363828cdb557cbd15a2c1bd2bff1a528",
+  "clips": [
+    {
+      "id": "waving",
+      "file": "Waving.fbx",
+      "path": "./clips/Waving.fbx",
+      "label": "Saludar",
+      "category": "conversacion",
+      "loop": false,
+      "repetitions": 2,
+      "fullBody": false,
+      "source": "Waving.fbx",
+      "sha256": "33ce3315242e261fe83b261422e9afba3e8e12c6c43fbad6b477df0cbef0f263"
+    },
+    {
+      "id": "talking",
+      "file": "Talking.fbx",
+      "path": "./clips/Talking.fbx",
+      "label": "Hablar · nueva toma",
+      "category": "conversacion",
+      "loop": true,
+      "repetitions": null,
+      "fullBody": false,
+      "source": "Talking(1).fbx",
+      "sha256": "705eba737a65f47d8158e1df6f2bb866363828cdb557cbd15a2c1bd2bff1a528"
+    },
+    {
+      "id": "idle",
+      "file": "Dwarf Idle.fbx",
+      "path": "./clips/Dwarf%20Idle.fbx",
+      "label": "Reposo · Dwarf Idle",
+      "category": "conversacion",
+      "loop": true,
+      "repetitions": null,
+      "fullBody": false,
+      "source": "Dwarf Idle.fbx",
+      "sha256": "74a1185528d4fa81c518e33c59d11bee6466195df23e7dedc8fc5862926373f3"
+    },
+    {
+      "id": "thinking",
+      "file": "Thinking.fbx",
+      "path": "./clips/Thinking.fbx",
+      "label": "Pensando",
+      "category": "conversacion",
+      "loop": false,
+      "repetitions": 1,
+      "fullBody": false,
+      "source": "Thinking.fbx",
+      "sha256": "0e4c23dd072e350cbfe39fb2aa3f5e1241adc4055fd8e4f5e4e498793050db51"
+    },
+    {
+      "id": "pointing",
+      "file": "Pointing.fbx",
+      "path": "./clips/Pointing.fbx",
+      "label": "Señalar",
+      "category": "conversacion",
+      "loop": false,
+      "repetitions": 1,
+      "fullBody": false,
+      "source": "Pointing.fbx",
+      "sha256": "d6a16bc0d5fe7b8688637905817d12142f625f6d6f763e561022e7665392be98"
+    },
+    {
+      "id": "pointinggesture",
+      "file": "Pointing Gesture.fbx",
+      "path": "./clips/Pointing%20Gesture.fbx",
+      "label": "Señalar con gesto",
+      "category": "conversacion",
+      "loop": false,
+      "repetitions": 1,
+      "fullBody": false,
+      "source": "Pointing Gesture.fbx",
+      "sha256": "c4fe2bd7d4990b907c0842f4c572b67060526d18b5d306cb8fcf59e710861e41"
+    },
+    {
+      "id": "no",
+      "file": "No.fbx",
+      "path": "./clips/No.fbx",
+      "label": "Negar / No",
+      "category": "conversacion",
+      "loop": false,
+      "repetitions": 1,
+      "fullBody": false,
+      "source": "No.fbx",
+      "sha256": "f15dd302ef8baf5e93f689d8cfd18514d892c1bdd3153c4fb17ec745bc422e51"
+    },
+    {
+      "id": "happy",
+      "file": "Happy.fbx",
+      "path": "./clips/Happy.fbx",
+      "label": "Alegría",
+      "category": "emociones",
+      "loop": false,
+      "repetitions": 1,
+      "fullBody": false,
+      "source": "Happy.fbx",
+      "sha256": "ad1b19d82fc812780e1a809944f1878143ac7b1628f0a0b2ee7ea66c9f082f80"
+    },
+    {
+      "id": "excited",
+      "file": "Excited.fbx",
+      "path": "./clips/Excited.fbx",
+      "label": "Entusiasmo",
+      "category": "emociones",
+      "loop": false,
+      "repetitions": 1,
+      "fullBody": false,
+      "source": "Excited.fbx",
+      "sha256": "9fccf23848f02c4aefd054e241ee5c2c6b4e87cb72e0f46393c9132549d9d017"
+    },
+    {
+      "id": "surprised",
+      "file": "Surprised.fbx",
+      "path": "./clips/Surprised.fbx",
+      "label": "Sorpresa",
+      "category": "emociones",
+      "loop": false,
+      "repetitions": 1,
+      "fullBody": false,
+      "source": "Surprised.fbx",
+      "sha256": "5e3663b4c095b225ab21648f1ad5524dc92327d5684feb32bc8b08f41e72aa84"
+    },
+    {
+      "id": "clapping",
+      "file": "Clapping.fbx",
+      "path": "./clips/Clapping.fbx",
+      "label": "Aplaudir",
+      "category": "emociones",
+      "loop": false,
+      "repetitions": 3,
+      "fullBody": false,
+      "source": "Clapping.fbx",
+      "sha256": "d46a8f0a35fc4df0df4a210380459f7f5c19cf3578eff258b8ee6fcf55a7f1c1"
+    },
+    {
+      "id": "kiss",
+      "file": "Blow A Kiss.fbx",
+      "path": "./clips/Blow%20A%20Kiss.fbx",
+      "label": "Lanzar un beso",
+      "category": "emociones",
+      "loop": false,
+      "repetitions": 1,
+      "fullBody": false,
+      "source": "Blow A Kiss.fbx",
+      "sha256": "30106bf6a6c257c713394ad5848482149135e66c7e137a89030d17fc1be88946"
+    },
+    {
+      "id": "walking",
+      "file": "Walking.fbx",
+      "path": "./clips/Walking.fbx",
+      "label": "Caminar en sitio",
+      "category": "movimiento",
+      "loop": true,
+      "repetitions": null,
+      "fullBody": true,
+      "source": "Walking.fbx",
+      "sha256": "ec8a3e1383d9d944c3c275f91d5680da69acb50d98b8d26ea611306776cb7f3d"
+    }
+  ],
+  "new_files_audit": [
+    {
+      "file": "Walking.fbx",
+      "size_mib": 1.407,
+      "sha256": "ec8a3e1383d9d944c3c275f91d5680da69acb50d98b8d26ea611306776cb7f3d",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 18405,
+      "duration_s": 1.367,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 42
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Blow A Kiss.fbx",
+      "size_mib": 1.888,
+      "sha256": "30106bf6a6c257c713394ad5848482149135e66c7e137a89030d17fc1be88946",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 75510,
+      "duration_s": 5.1,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 154
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Clapping.fbx",
+      "size_mib": 1.373,
+      "sha256": "d46a8f0a35fc4df0df4a210380459f7f5c19cf3578eff258b8ee6fcf55a7f1c1",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 15498,
+      "duration_s": 1.167,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 36
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Surprised.fbx",
+      "size_mib": 1.9,
+      "sha256": "5e3663b4c095b225ab21648f1ad5524dc92327d5684feb32bc8b08f41e72aa84",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 61650,
+      "duration_s": 4.0,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 150
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Happy.fbx",
+      "size_mib": 2.298,
+      "sha256": "ad1b19d82fc812780e1a809944f1878143ac7b1628f0a0b2ee7ea66c9f082f80",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 152793,
+      "duration_s": 10.0,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 301
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Excited.fbx",
+      "size_mib": 2.083,
+      "sha256": "9fccf23848f02c4aefd054e241ee5c2c6b4e87cb72e0f46393c9132549d9d017",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 98340,
+      "duration_s": 6.567,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 222
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "No.fbx",
+      "size_mib": 1.899,
+      "sha256": "f15dd302ef8baf5e93f689d8cfd18514d892c1bdd3153c4fb17ec745bc422e51",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 76809,
+      "duration_s": 5.0,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 173
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Thinking.fbx",
+      "size_mib": 1.784,
+      "sha256": "0e4c23dd072e350cbfe39fb2aa3f5e1241adc4055fd8e4f5e4e498793050db51",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 64041,
+      "duration_s": 4.233,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 162
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Pointing Gesture.fbx",
+      "size_mib": 1.502,
+      "sha256": "c4fe2bd7d4990b907c0842f4c572b67060526d18b5d306cb8fcf59e710861e41",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 26715,
+      "duration_s": 1.833,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 95
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Pointing.fbx",
+      "size_mib": 1.631,
+      "sha256": "d6a16bc0d5fe7b8688637905817d12142f625f6d6f763e561022e7665392be98",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 38043,
+      "duration_s": 2.767,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 84
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    },
+    {
+      "file": "Talking(1).fbx",
+      "size_mib": 2.349,
+      "sha256": "705eba737a65f47d8158e1df6f2bb866363828cdb557cbd15a2c1bd2bff1a528",
+      "fbx_version": 7700,
+      "model_count": 158,
+      "bone_model_count": 155,
+      "animation_curve_nodes": 117,
+      "animation_curves": 693,
+      "total_keyframes_per_curve": 156849,
+      "duration_s": 10.267,
+      "keys_per_curve": {
+        "min": 1,
+        "max": 309
+      },
+      "animation_stacks": [
+        "mixamo.com\u0000\u0001AnimStack"
+      ],
+      "same_155_bones_as_old_talking": true,
+      "missing_bones": [],
+      "sample_curve_owner": [
+        [
+          "T\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Translation"
+        ],
+        [
+          "R\u0000\u0001AnimCurveNode",
+          "LUMIA_FULL_SKIN_1",
+          "Lcl Rotation"
+        ]
+      ]
+    }
+  ],
+  "speed_range": [
+    0.35,
+    1.5
+  ],
+  "default_speed": 0.7,
+  "visually_validated": false,
+  "walk_in_place": true
+}

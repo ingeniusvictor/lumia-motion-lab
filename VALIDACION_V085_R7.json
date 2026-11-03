@@ -1,0 +1,19 @@
+{
+  "version": "v0.8.5 R7",
+  "validation": "PASS code tests; browser visual pending",
+  "original_vrm_sha256": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "essential_fbx_count": 17,
+  "all_fbx_unchanged_from_R6": true,
+  "choreography_engine_unchanged": true,
+  "breakdance_bundled": false,
+  "semantic_max_per_response": 3,
+  "semantic_default_intensity": 48,
+  "regression_tests": [
+    "test-semantic-motion-r7",
+    "test-motion-r6",
+    "test-motion-intelligence",
+    "test-v085-integration",
+    "test-library-catalog",
+    "test-presencia-viva-r2"
+  ]
+}

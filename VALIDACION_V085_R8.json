@@ -1,0 +1,16 @@
+{
+  "pass": true,
+  "codeTests": 17,
+  "essentialClips": 17,
+  "vrmUnchanged": true,
+  "fbxUnchanged": true,
+  "httpSmoke": true,
+  "visualBrowser": "pending user verification",
+  "features": [
+    "speech-session",
+    "external-audio-motion-events",
+    "pose-blend",
+    "R7-semantic-gestures",
+    "3-step-dance-composer"
+  ]
+}

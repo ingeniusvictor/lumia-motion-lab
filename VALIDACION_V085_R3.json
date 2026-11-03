@@ -1,0 +1,17 @@
+{
+  "version": "0.8.5 R3",
+  "asset_count": 16,
+  "fbx_count": 15,
+  "vrm_count": 1,
+  "assets_unchanged": true,
+  "thinking_fbx_source_spike": {
+    "bone": "J_Bip_R_LowerArm",
+    "time_seconds": 2.87,
+    "delta_degrees": 70.3,
+    "interval_seconds": 0.0033333333333333335,
+    "source_evidence": "FBX binary AnimationCurve X and Z"
+  },
+  "talking_fbx_seam": "first and last local Euler arm and chest values match",
+  "browser_visual": "pendiente de usuario",
+  "test_scripts": 15
+}

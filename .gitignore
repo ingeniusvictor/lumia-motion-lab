@@ -1,14 +1,15 @@
-# Assets de terceros no publicables sin permisos
+# Recursos descargados/terceros: nunca publicar en GitHub publico
 *.fbx
 *.vrm
 *.glb
 clips/
-*.zip
+private-assets/
 *.bundle
-node_modules/
+*.zip
 .env
 .env.*
 !.env.example
+node_modules/
 __pycache__/
 *.pyc
 .DS_Store

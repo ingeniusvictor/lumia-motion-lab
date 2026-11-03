@@ -1,0 +1,20 @@
+{
+  "version": "0.8.5 R1",
+  "source_kit": "LUMIA_VITA_NATURAL_V085_MOTION_INTELLIGENCE_KIT.zip",
+  "issue": "video shows torso oscillation and abrupt posture changes during initial text interaction",
+  "fixes": [
+    "default procedural idle: no automatic Dwarf Idle",
+    "optional auto idle checkbox",
+    "adjustable thinking gesture delay 0–1.5 s, default 0.65 s",
+    "speaking debounce 0.25 s",
+    "smoother FBX fades in 0.55 s/out 0.62 s",
+    "manual clips unchanged"
+  ],
+  "fbx_clips": 15,
+  "fbx_bytes_unchanged": true,
+  "trajectory_bytes_unchanged": true,
+  "vrm_bytes_unchanged": true,
+  "vrm_sha256": "f2e68b5379d8e16e8ef2a5cd4a51468b0ceff5a95966f948ca0e46d3421ac8a6",
+  "tests": "all test-*.mjs PASS, JS syntax PASS",
+  "browser": "attempted; navigation blocked ERR_BLOCKED_BY_ADMINISTRATOR; requires user visual QA"
+}
