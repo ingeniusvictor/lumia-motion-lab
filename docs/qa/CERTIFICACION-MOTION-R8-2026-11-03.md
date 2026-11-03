@@ -34,3 +34,10 @@ Entorno: Node v22.16.0, Python 3.13.5, Git 2.47.3. La automatización del reposi
 - No fusionar PR #2 directamente a main sin antes revisar documentación #1 y esta certificación.
 
 **Próximo paso:** ejecutar PH-00 del portal original (baseline, TTS real, secuencias y UI). Después iniciar POC reversible de cabeza VRM manteniendo el motor de IA en `orbi-jarvis-agent-lab`.
+
+
+## Ejecución CI confirmada — 2026-11-03
+
+El workflow `LUMIA Motion R8 - regression sin assets` finalizó **SUCCESS** en GitHub en la rama de fuentes, después de publicar las pruebas sin FBX/VRM. Enlace a las comprobaciones desde el PR: https://github.com/ingeniusvictor/lumia-motion-lab/pull/2
+
+Esto es adicional a las pruebas locales: **17 scripts aptos para CI público**, mientras que el kit privado con assets pasó **18/18**. No se ha certificado todavía la reproducción visual ni el enlace con el TTS del portal original.
