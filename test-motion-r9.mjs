@@ -12,7 +12,7 @@ eq(r9.enabled,false,'R9 must be OFF by default');
 eq(r9.begin('Sí, claro',{sessionId:1}),0,'OFF: no plans');
 eq(r9.step(.016,{speaking:true}).kind,null,'OFF: no gesture');
 r9.setEnabled(true);
-eq(r9.begin('Sí, claro. Primero te explico. Felicidades.',{sessionId:2}),3,'recognize three phrases');
+eq(r9.begin('Sí, claro, estoy de acuerdo. Primero te explico los pasos detalladamente. Felicidades, lo logramos.',{sessionId:2}),3,'recognize three phrases');
 ok(!r9.boundary(10,999),'ignore wrong speech session');
 ok(r9.boundary(3,2),'accept valid TTS word boundary');
 ok(!r9.boundary(1,2),'prevent retrograde TTS boundary');
