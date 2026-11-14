@@ -14,6 +14,7 @@ import {createForwardWalkController} from './walking-forward.js';
 import {createCircleWalkController} from './walking-circle.js';
 import {MotionIntelligence} from './motion-intelligence.js';
 import {SemanticMotionCore} from './semantic-motion.js';
+import {R9MotionPilot} from './r9-motion-pilot.js';
 import {PoseTransition} from './pose-transition.js';
 import {repairQuaternionMicroSpikes} from './motion-clip-stability.js';
 import {buildDanceRoutine, DanceSequenceClock, prepareDancePlan} from './dance-choreography.js';
@@ -69,6 +70,7 @@ const mixamoState={mixer:null,action:null,active:false,ready:false,tracks:0,clip
   speed:DEFAULT_CLIP_SPEED, repetitions:1, elapsedSource:0,fadeOutRemaining:0,fadeOutDuration:0.62,fadeInRemaining:0,fadeInDuration:0.55,origin:null};
 const motionIntelligence=new MotionIntelligence({enabled:true,variety:55});
 const semanticMotion=new SemanticMotionCore({enabled:true,intensity:48});
+const r9Motion=new R9MotionPilot({enabled:false,intensity:80});
 const poseBridge=new PoseTransition(.44);
 let poseBlendEnabled=true;
 let conversationEventStatus='Sin eventos de voz';
@@ -77,10 +79,11 @@ window.addEventListener('lumia:speech-motion',event=>{
  const {phase,text,index,id,source}=event.detail||{};
  conversationEventStatus=phase==='start'?`Voz iniciada · ${source} · sesión ${id}`:phase==='boundary'?`Avance de palabra · sesión ${id}`:`Voz finalizada · sesión ${id}`;
  const voiceInfo=$('#r8-voice-status');if(voiceInfo)voiceInfo.textContent=conversationEventStatus;
- if(phase==='start')semanticMotion.begin(text);
- else if(phase==='boundary')semanticMotion.boundary(index);
- else if(phase==='end')semanticMotion.end();
+ if(phase==='start'){semanticMotion.begin(text);r9Motion.begin(text,{sessionId:id});}
+ else if(phase==='boundary'){semanticMotion.boundary(index);r9Motion.boundary(index,id);}
+ else if(phase==='end'){semanticMotion.end();r9Motion.end(id);}
  updateSemanticUI();
+ updateR9UI();
 });
 let manualLock=false,autoMotionPending=false,autoRequestId=0;
 let selectedFbx=null;
@@ -426,6 +429,20 @@ function updateSemanticUI(){
   if(value!==semanticLastStatus){info.textContent=value;semanticLastStatus=value;}
  }
 }
+function updateR9UI(){
+ const s=r9Motion.snapshot();
+ const toggle=$('#r9-autonomous-enabled');if(toggle)toggle.checked=s.enabled;
+ const slider=$('#r9-autonomous-intensity');if(slider)slider.value=String(s.intensity);
+ const label=$('#r9-autonomous-intensity-label');if(label)label.textContent=`${Math.round(s.intensity)}%`;
+ const status=$('#r9-autonomous-status');if(status){
+  status.textContent=!s.enabled?'Comparación R8 activa. R9 apagado.':
+   s.speaking?`R9 en voz · gestos previstos ${s.planned} · ${s.active||s.lastCue||'esperando frase'}`:
+   'R9 listo · activa las pruebas de voz (Sí / No / Explicar / Celebración).';
+ }
+}
+$('#r9-autonomous-enabled').addEventListener('change',event=>{r9Motion.setEnabled(event.target.checked);updateR9UI();});
+$('#r9-autonomous-intensity').addEventListener('input',event=>{r9Motion.setIntensity(Number(event.target.value));updateR9UI();});
+updateR9UI();
 $('#r8-pose-blend').addEventListener('change',event=>{poseBlendEnabled=!!event.target.checked;if(!poseBlendEnabled)poseBridge.clear();});
 $('#semantic-enabled').addEventListener('change',event=>{semanticMotion.setEnabled(event.target.checked);updateSemanticUI();});
 $('#semantic-intensity').addEventListener('input',event=>{semanticMotion.setIntensity(event.target.value);updateSemanticUI();});
@@ -438,7 +455,7 @@ const semanticQuaternion=new THREE.Quaternion();const semanticEuler=new THREE.Eu
 function applySemanticBody(pose){
  for(const [name,value] of Object.entries(pose.body||{})){
   if(!Number.isFinite(value)||Math.abs(value)<.00001)continue;
-  const m=/^(leftUpperArm|rightUpperArm|leftLowerArm|rightLowerArm|chest)(X|Y|Z)$/.exec(name);
+  const m=/^(leftUpperArm|rightUpperArm|leftLowerArm|rightLowerArm|leftHand|rightHand|chest)(X|Y|Z)$/.exec(name);
   if(!m)continue;
   const bone=bodyBones.get(m[1]);if(!bone)continue;
   semanticEuler.set(m[2]==='X'?value:0,m[2]==='Y'?value:0,m[2]==='Z'?value:0);
@@ -880,6 +897,9 @@ window.LUMIA_BODY={
   setThinkingGestureDelay(value){motionIntelligence.setThinkingDelay(value);updateIntelligenceUI();return motionIntelligence.thinkingDelay;},
   getMotionIntelligence(){return {...motionIntelligence.snapshot(),presence:{...presenceConfig},semantic:semanticMotion.snapshot(),stability:{...stabilityConfig,thinkingRepair:lastThinkingRepair}};},
   getSemanticMotion(){return semanticMotion.snapshot();},
+  getR9Motion(){return r9Motion.snapshot();},
+  setR9MotionEnabled(v){const result=r9Motion.setEnabled(v);updateR9UI();return result;},
+  setR9MotionIntensity(v){const result=r9Motion.setIntensity(Number(v));updateR9UI();return result;},
   getVoiceSync(){return {event:conversationEventStatus,session:window.LUMIAConversation?.getSpeechSession?.()??null,poseBlendActive:poseBridge.active,poseBlendEnabled};},
   setPoseBlendEnabled(v){poseBlendEnabled=!!v;$('#r8-pose-blend').checked=poseBlendEnabled;if(!poseBlendEnabled)poseBridge.clear();return poseBlendEnabled;},
   setSemanticMotionEnabled(v){semanticMotion.setEnabled(v);updateSemanticUI();return semanticMotion.enabled;},
@@ -1062,7 +1082,10 @@ function renderFrame(now) {
       }
     }
     updateDanceFrame(dt);
-    const semanticPose=semanticMotion.step(dt,{speaking:config.behavior==='speaking'&&motionIntelligence.enabled,manual:manualLock,dancing:danceState.active||danceState.loading});
+    const speechMotionOpts={speaking:config.behavior==='speaking'&&motionIntelligence.enabled,manual:manualLock,dancing:danceState.active||danceState.loading};
+    const r8SemanticPose=semanticMotion.step(dt,speechMotionOpts);
+    const r9SemanticPose=r9Motion.step(dt,speechMotionOpts);
+    const semanticPose=r9Motion.enabled?r9SemanticPose:r8SemanticPose;
     if(semanticPose.kind&&!danceState.active&&!manualLock)applySemanticBody(semanticPose);
     // Frame-last pose bridge: respects new FBX or procedural pose and avoids a T-pose flash.
     if(!danceState.active && !danceState.loading && poseBlendEnabled)poseBridge.step(dt);
@@ -1080,6 +1103,7 @@ function renderFrame(now) {
   uiAccum+=dt;
   if(uiAccum>.35) {
     uiAccum=0;
+    updateR9UI();
     runtimeState.textContent = vrm ?
       `${behaviorLabels[state.behavior][0]} · ojos X ${Math.round(state.gazeX*100)} / Y ${Math.round(state.gazeY*100)} · cabeza ${Math.round(state.headYaw*180/Math.PI)}° horizontal / ${Math.round(state.headPitch*180/Math.PI)}° vertical · parpadeos ${state.blinkCount}` : 'Modelo en carga';
   }
