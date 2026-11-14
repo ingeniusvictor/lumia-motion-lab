@@ -90,6 +90,13 @@ label{display:block;color:#b9d7e0;font-size:12.5px;margin:12px 0 9px}label span{
 <div class="actions triple" style="margin-top:7px"><button data-semantic-demo="affirm">Probar Sí</button><button data-semantic-demo="deny">Probar No</button><button data-semantic-demo="explain">Explicar</button></div>
 <div class="actions"><button data-semantic-demo="celebrate">Probar celebración</button></div>
 <div class="info" id="semantic-status" aria-live="polite">Esperando voz · el texto de la respuesta activará los gestos</div>
+<div class="info" id="r9-lab-panel" style="margin-top:12px"><strong>🧪 Motion R9 · Movilidad autónoma experimental</strong>
+<small>Comparación directa sobre el avatar R8 y sus 17 FBX originales. El motor R9 sincroniza pequeños movimientos de cabeza, brazos, manos y pecho con la frase que se está pronunciando. No usa el cerebro principal de LUMIA.</small></div>
+<label class="convo-check" for="r9-autonomous-enabled"><input type="checkbox" id="r9-autonomous-enabled"><span>Activar gestos autónomos R9 (desactivado al abrir)</span></label>
+<label for="r9-autonomous-intensity">Intensidad R9 <span id="r9-autonomous-intensity-label">80%</span></label>
+<input id="r9-autonomous-intensity" type="range" min="0" max="100" step="5" value="80" aria-label="Intensidad experimental de gestos R9">
+<div class="info" id="r9-autonomous-status" aria-live="polite">Comparación R8 activa. R9 apagado.</div>
+<small>Prueba los botones Sí, No, Explicar y Celebración de arriba y alterna R8/R9. Durante gestos manuales y bailes R9 cede el control. Los movimientos quedan acotados y se detienen al acabar o interrumpir el audio.</small>
 <small>Solo se aplican mientras Lumia está hablando mediante TTS (o con señales explícitas de un TTS externo). Máximo tres gestos discretos por respuesta, con separación temporal. Si el navegador no informa los límites de palabra, su momento se aproxima por tiempo. El compositor de baile y las animaciones manuales conservan prioridad.</small>
 <label for="intelligence-thinking-delay">Espera antes de gesticular al pensar <span id="intelligence-thinking-delay-label">0,65 s</span></label>
 <input id="intelligence-thinking-delay" type="range" min="0" max="1.5" step="0.05" value="0.65" aria-label="Retraso para iniciar el gesto Pensando">
