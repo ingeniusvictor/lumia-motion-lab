@@ -481,7 +481,7 @@ async function playManualLibraryClip(key){
  return started;
 }
 function directorTick(){
- if(!vrm||!motionIntelligence.enabled||autoMotionPending||manualLock)return;
+ if(!vrm||avatarLab.ownsAnimation()||!motionIntelligence.enabled||autoMotionPending||manualLock)return;
  const cue=getEmotionCue();
  const intent=motionIntelligence.decide({now:elapsed,state:config.behavior,activeId:mixamoState.source,active:mixamoState.active,
   transitioning:mixamoState.fadeOutRemaining>0,manual:manualLock,pending:autoMotionPending,
@@ -1099,7 +1099,7 @@ function renderFrame(now) {
   const dt = lastTime ? Math.min((now-lastTime)/1000,0.05) : 0.016;
   lastTime=now;
   elapsed += dt;
-  if(!motionIntelligence.enabled && circleWalkAuto && config.behavior==='thinking' && !thinkingAutoTriggered && !thinkingAutoPending && elapsed-thinkingSince>4 && !mixamoState.active){
+  if(vrm && !avatarLab.ownsAnimation() && !motionIntelligence.enabled && circleWalkAuto && config.behavior==='thinking' && !thinkingAutoTriggered && !thinkingAutoPending && elapsed-thinkingSince>4 && !mixamoState.active){
     thinkingAutoPending=true;
     playLibraryClip('walkingcircle',{origin:'legacy'}).then(started=>{thinkingAutoTriggered=!!started;thinkingAutoPending=false;
       if(started && config.behavior!=='thinking')stopMixamo();
@@ -1115,7 +1115,7 @@ function renderFrame(now) {
   const state = core.step(dt, config);
   const bodyState = bodyCore.step(dt,config);
   const presenceState = presenceCore.step(dt,{...config,...presenceConfig});
-  if(vrm) {
+  if(vrm && !avatarLab.ownsAnimation()) {
     const manager=vrm.expressionManager;
     if(manager) {
       for(const name of ['aa','ee','ih','oh','ou','blink','blinkLeft','blinkRight']){
@@ -1184,6 +1184,14 @@ function renderFrame(now) {
       headBone.quaternion.copy(headOriginalQuaternion).multiply(localDelta);
     }
     vrm.update(dt);
+    avatarLab.step(dt);
+  }else if(vrm){
+    // An embedded VRM clip owns the rig during playback. Never add R8/R9 bones over it.
+    avatarLab.step(dt);
+    vrm.update(dt);
+  }else{
+    // Generic GLB/FBX has its own mixer and does not receive VRM retargeted FBX.
+    avatarLab.step(dt);
   }
   controls.update();
   renderer.render(scene,camera);
@@ -1192,7 +1200,8 @@ function renderFrame(now) {
     uiAccum=0;
     updateR9UI();
     runtimeState.textContent = vrm ?
-      `${behaviorLabels[state.behavior][0]} · ojos X ${Math.round(state.gazeX*100)} / Y ${Math.round(state.gazeY*100)} · cabeza ${Math.round(state.headYaw*180/Math.PI)}° horizontal / ${Math.round(state.headPitch*180/Math.PI)}° vertical · parpadeos ${state.blinkCount}` : 'Modelo en carga';
+      `${behaviorLabels[state.behavior][0]} · ojos X ${Math.round(state.gazeX*100)} / Y ${Math.round(state.gazeY*100)} · cabeza ${Math.round(state.headYaw*180/Math.PI)}° horizontal / ${Math.round(state.headPitch*180/Math.PI)}° vertical · parpadeos ${state.blinkCount}` :
+      avatarLab.isGeneric()?'Personaje GLB/FBX · visor de animaciones propias · sin retarget VRM':'Modelo en carga';
   }
 }
 requestAnimationFrame(renderFrame);
