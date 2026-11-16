@@ -28,6 +28,7 @@ eq(gate.isCurrent(two),true,'accept latest avatar');
 const fakeModel={
   animations:clips.slice(1),
   children:[],
+  updateMatrixWorld(){},
   traverse(fn){fn({isMesh:true,isSkinnedMesh:true,isBone:false,morphTargetDictionary:{Blink:0,Smile:1}});
     fn({isBone:true});}
 };
