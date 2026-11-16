@@ -46,6 +46,12 @@ label{display:block;color:#b9d7e0;font-size:12.5px;margin:12px 0 9px}label span{
 <h2>🧍 Motion R9-02 · Cambiar personaje</h2>
 <p>Prueba modelos VRM, GLB o FBX con esqueleto y/o animaciones propias. Se abre desde tu PC y no se sube al servidor.</p>
 <div class="info" id="avatar-current" aria-live="polite">Actual: LUMIA Natural V0.5 · referencia aprobada</div>
+<label for="avatar-session-select">Personajes para comparar en esta sesión</label>
+<select id="avatar-session-select" disabled style="width:100%;background:#10273a;color:#e8faff;border:1px solid #34566a;border-radius:8px;padding:9px">
+<option value="original">LUMIA Natural V0.5 · aprobado</option>
+</select>
+<small>Hasta 12 referencias locales en esta pestaña. Puedes alternar sin volver a buscarlas, aunque cada modelo se vuelve a cargar para liberar memoria de video.</small>
+<button type="button" id="avatar-clear-list" disabled style="width:100%;margin-top:8px">Vaciar lista y volver al original</button>
 <label for="avatar-model-file">Importar personaje completo (.vrm, .glb, .fbx)</label>
 <input type="file" id="avatar-model-file" accept=".vrm,.glb,.fbx" disabled style="max-width:100%;width:100%;font-size:12px"/>
 <div class="actions" style="margin-top:10px">
