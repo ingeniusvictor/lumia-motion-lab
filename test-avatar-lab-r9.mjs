@@ -71,6 +71,28 @@ const THREE={LoadingManager:FakeManager,Group:FakeGroup,Box3:FakeBox,Vector3:Fak
   AnimationMixer:FakeMixer,LoopRepeat:1,LoopOnce:2};
 const opts={THREE,GLTFLoader:FakeGLTF,FBXLoader:FakeFBX,VRMLoaderPlugin:class{}};
 const fakeFile=(name)=>({name,size:4096,async arrayBuffer(){return new ArrayBuffer(8);}});
+// External references must be satisfied exclusively by user-selected images.
+class SidecarGLTF extends FakeGLTF {
+  async parseAsync(){
+    const objectUrl=this.manager.modify('textures/skin.png');
+    yes(objectUrl.startsWith('blob:'),'sidecar image was mapped to a local object URL');
+    return {scene:fakeModel,userData:{},animations:clips.slice(1)};
+  }
+}
+const sidecar=new Blob(['fake-image-bytes']);
+Object.defineProperty(sidecar,'name',{value:'Skin.PNG'});
+const localModel=await parseLocalAvatar(fakeFile('character.glb'),{
+  ...opts,GLTFLoader:SidecarGLTF,resources:[sidecar],
+});
+localModel.releaseSidecars();
+class ExternalGLTF extends FakeGLTF {
+  async parseAsync(){this.manager.modify('https://example.invalid/remote.jpg');}
+}
+checks++;await assert.rejects(
+  parseLocalAvatar(fakeFile('untrusted.glb'),{...opts,GLTFLoader:ExternalGLTF}),
+  /Falta textura externa/,'no remote asset fetch from user model'
+);
+
 const glb=await parseLocalAvatar(fakeFile('character.glb'),opts);
 eq(glb.kind,'glb');
 eq(glb.inventory.length,2);
