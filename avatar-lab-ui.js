@@ -20,7 +20,19 @@ export function installAvatarLab({
   const loop=$('avatar-loop'),speed=$('avatar-animation-speed');
   const speedLabel=$('avatar-animation-speed-label');
   const rotateX=$('avatar-rotate-x'),rotateY=$('avatar-rotate-y');
+  const gallery=$('avatar-session-select'),clearList=$('avatar-clear-list');
+  const recentFiles=new Map();let nextRecent=0,selectedKey='original';
   let original=null,active=null,uiTimer=0;
+  function refreshGallery(){
+    gallery.replaceChildren();
+    if(original){const option=document.createElement('option');option.value='original';option.textContent='LUMIA Natural V0.5 · aprobado';gallery.add(option);}
+    for(const [key,entry] of recentFiles){
+      const option=document.createElement('option');option.value=key;option.textContent=entry.file.name;gallery.add(option);
+    }
+    gallery.disabled=recentFiles.size===0;
+    clearList.disabled=recentFiles.size===0||!original;
+    if(gallery.querySelector('option[value="'+selectedKey+'"]'))gallery.value=selectedKey;
+  }
 
   function writeStatus(message,error=false){
     status.textContent=message;
@@ -39,7 +51,7 @@ export function installAvatarLab({
     speed.disabled=!any;
     loop.disabled=!any;
     if(snapshot?.playing){
-      const name=active.inventory[snapshot.index]?.name||'Clip interno';
+      const name=active.inventory.find(item=>item.index===snapshot.index)?.name||'Clip interno';
       writeStatus((snapshot.paused?'Pausa':'Reproduciendo')+' · '+name+
         ' · '+active.format.toUpperCase()+' · sin alterar los archivos originales');
     }
@@ -96,13 +108,14 @@ export function installAvatarLab({
     };
     input.disabled=false;
     switchTo(original);
+    selectedKey='original';refreshGallery();
     writeStatus('Modelo original aprobado listo · motor Motion R8/R9 activo.');
   }
   function defaultFailed(message){
     input.disabled=false;
     writeStatus('No cargó el VRM original. Puedes intentar un personaje externo. '+message,true);
   }
-  async function importFile(file){
+  async function importFile(file,recentKey=null){
     if(!file)return;
     let info;
     try { info=validateAvatarFile(file); }
@@ -131,6 +144,17 @@ export function installAvatarLab({
         normalized,isDefault:false,
       };
       switchTo(next);
+      if(recentKey&&recentFiles.has(recentKey)){selectedKey=recentKey;}
+      else{
+        const found=[...recentFiles].find(([,entry])=>entry.file.name===file.name&&entry.file.size===file.size&&entry.file.lastModified===file.lastModified);
+        if(found)selectedKey=found[0];
+        else{
+          const key='local-'+(++nextRecent);selectedKey=key;
+          recentFiles.set(key,{file});
+          if(recentFiles.size>12)recentFiles.delete(recentFiles.keys().next().value);
+        }
+      }
+      refreshGallery();
       if(next.mode==='generic'){
         if(next.player){
           const index=next.inventory[0].index;
@@ -154,19 +178,34 @@ export function installAvatarLab({
     }finally{
       if(gate.isCurrent(token))input.disabled=false;
       input.value='';
+      if(!gate.isCurrent(token))return;
+      refreshGallery();
     }
   }
 
   input.addEventListener('change',(event)=>{void importFile(event.target.files?.[0]);});
   restore.addEventListener('click',()=>{
-    gate.next();
+    gate.next();input.disabled=false;
     if(!original)return;
     if(active===original){
       writeStatus('LUMIA Natural V0.5 ya está activa.');
       return;
     }
     switchTo(original);
+    selectedKey='original';refreshGallery();
     writeStatus('Referencia original restaurada. Motion R8/R9 disponible.');
+  });
+  gallery.addEventListener('change',()=>{
+    const key=gallery.value;
+    if(key===selectedKey)return;
+    if(key==='original'){restore.click();return;}
+    const entry=recentFiles.get(key);
+    if(entry)void importFile(entry.file,key);
+  });
+  clearList.addEventListener('click',()=>{
+    if(!original)return;
+    restore.click();recentFiles.clear();refreshGallery();
+    writeStatus('Lista de personajes de prueba vaciada; LUMIA original restaurada.');
   });
   frame.addEventListener('click',()=>{if(active)onFrame(active);});
   play.addEventListener('click',()=>{
