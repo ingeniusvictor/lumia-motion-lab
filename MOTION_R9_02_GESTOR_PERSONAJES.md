@@ -26,6 +26,8 @@ Si el visor Python sigue funcionando, basta con abrir su URL impresa (normalment
 
 No requiere arranque de Node, bridge, Ollama, Whisper ni Kokoro.
 
+Para evitar errores al intentar abrir un localhost sin servidor, actualizar con git pull y hacer doble clic en ABRIR_MOTION_R9_LAB.cmd. Este archivo inicia Python, espera a que el puerto esté enlazado y abre el navegador; al mantener la ventana abierta, el portal permanece disponible. Si 5190 está ocupado, el servidor busca el siguiente hasta 5200. Las pruebas node solo validan, no abren el portal.
+
 ## Protecciones de funcionamiento
 
 - La selección abre archivos con la API File del navegador. No hay subida de archivos ni copias del usuario a disco.
