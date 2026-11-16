@@ -247,6 +247,10 @@ export function installAvatarLab({
       if(uiTimer>.7){uiTimer=0;refreshPlayer();}
     },
     ownsAnimation,
+    stopOwnAnimation(){
+      if(!active?.player)return false;
+      active.player.stop();onOwnAnimation(false);refreshPlayer();return true;
+    },
     isGeneric(){return active?.mode==='generic';},
     isReady(){return !!active;},
     snapshot(){
