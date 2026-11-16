@@ -14,6 +14,7 @@ export function installAvatarLab({
   const $=id=>document.getElementById(id);
   const gate=new AvatarLoadGate();
   const input=$('avatar-model-file');
+  const sidecarInput=$('avatar-extra-files');
   const current=$('avatar-current'),status=$('avatar-loading');
   const restore=$('avatar-restore'),frame=$('avatar-frame');
   const select=$('avatar-animation'),play=$('avatar-animation-play'),stop=$('avatar-animation-stop');
@@ -86,7 +87,7 @@ export function installAvatarLab({
     if(!active)return;
     active.player?.dispose();
     scene.remove(active.root);
-    if(active!==original)disposeImportedAvatar(active.model);
+    if(active!==original){disposeImportedAvatar(active.model);active.releaseSidecars?.();}
   }
   function switchTo(next){
     beforeSwitch();
@@ -115,8 +116,9 @@ export function installAvatarLab({
     input.disabled=false;
     writeStatus('No cargó el VRM original. Puedes intentar un personaje externo. '+message,true);
   }
-  async function importFile(file,recentKey=null){
+  async function importFile(file,recentKey=null,selectedSidecars=null){
     if(!file)return;
+    const resources=selectedSidecars??[...(sidecarInput?.files||[])];
     let info;
     try { info=validateAvatarFile(file); }
     catch(err){writeStatus(String(err.message||err),true);return;}
@@ -125,8 +127,8 @@ export function installAvatarLab({
     input.disabled=true;
     let candidate=null;
     try{
-      candidate=await parseLocalAvatar(file,{THREE,GLTFLoader,FBXLoader,VRMLoaderPlugin});
-      if(!gate.isCurrent(token)){disposeImportedAvatar(candidate.model);return;}
+      candidate=await parseLocalAvatar(file,{THREE,GLTFLoader,FBXLoader,VRMLoaderPlugin,resources});
+      if(!gate.isCurrent(token)){disposeImportedAvatar(candidate.model);candidate.releaseSidecars?.();return;}
       const compatible=!!candidate.vrm && candidate.report.vrmHumanoid;
       let root=candidate.model;
       let normalized=null;
@@ -141,16 +143,16 @@ export function installAvatarLab({
         name:info.name,format:candidate.kind,mode:compatible?'vrm':'generic',
         vrm:compatible?candidate.vrm:null,root,model:candidate.model,
         report:candidate.report,inventory:candidate.inventory,player,
-        normalized,isDefault:false,
+        normalized,isDefault:false,releaseSidecars:candidate.releaseSidecars,
       };
       switchTo(next);
       if(recentKey&&recentFiles.has(recentKey)){selectedKey=recentKey;}
       else{
         const found=[...recentFiles].find(([,entry])=>entry.file.name===file.name&&entry.file.size===file.size&&entry.file.lastModified===file.lastModified);
-        if(found)selectedKey=found[0];
+        if(found){selectedKey=found[0];recentFiles.set(selectedKey,{file,resources});}
         else{
           const key='local-'+(++nextRecent);selectedKey=key;
-          recentFiles.set(key,{file});
+          recentFiles.set(key,{file,resources});
           if(recentFiles.size>12)recentFiles.delete(recentFiles.keys().next().value);
         }
       }
@@ -173,7 +175,7 @@ export function installAvatarLab({
         writeStatus('No se pudo cargar '+info.name+': '+String(err?.message||err)+'. Se conserva el personaje anterior.',true);
       }
       if(candidate && candidate.model && candidate.model!==active?.model){
-        disposeImportedAvatar(candidate.model);
+        disposeImportedAvatar(candidate.model);candidate.releaseSidecars?.();
       }
     }finally{
       if(gate.isCurrent(token))input.disabled=false;
@@ -200,7 +202,7 @@ export function installAvatarLab({
     if(key===selectedKey)return;
     if(key==='original'){restore.click();return;}
     const entry=recentFiles.get(key);
-    if(entry)void importFile(entry.file,key);
+    if(entry)void importFile(entry.file,key,entry.resources);
   });
   clearList.addEventListener('click',()=>{
     if(!original)return;
