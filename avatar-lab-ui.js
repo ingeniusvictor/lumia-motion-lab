@@ -22,6 +22,7 @@ export function installAvatarLab({
   const speedLabel=$('avatar-animation-speed-label');
   const rotateX=$('avatar-rotate-x'),rotateY=$('avatar-rotate-y');
   const rotateZ=$('avatar-rotate-z'),resetRotation=$('avatar-reset-rotation');
+  const flipFront=$('avatar-flip-front');
   const gallery=$('avatar-session-select'),clearList=$('avatar-clear-list');
   const recentFiles=new Map();let nextRecent=0,selectedKey='original';
   let original=null,active=null,uiTimer=0;
@@ -70,6 +71,7 @@ export function installAvatarLab({
     rotateX.disabled=active.mode!=='generic';
     rotateY.disabled=active.mode!=='generic';
     rotateZ.disabled=active.mode!=='generic';
+    flipFront.disabled=active.mode!=='generic';
     resetRotation.disabled=active.mode!=='generic';
     select.replaceChildren();
     if(!active.inventory.length){
@@ -88,6 +90,10 @@ export function installAvatarLab({
   }
   function releaseCurrent(){
     if(!active)return;
+    if(active.mode==='generic'){
+      const entry=recentFiles.get(selectedKey);
+      if(entry)entry.rotation={x:active.root.rotation.x,y:active.root.rotation.y,z:active.root.rotation.z};
+    }
     active.player?.dispose();
     scene.remove(active.root);
     if(active!==original){disposeImportedAvatar(active.model);active.releaseSidecars?.();}
@@ -136,8 +142,15 @@ export function installAvatarLab({
       let root=candidate.model;
       let normalized=null;
       if(!compatible){
-        normalized=normalizeGenericAvatar(THREE,candidate.model);
+        normalized=normalizeGenericAvatar(THREE,candidate.model,{kind:candidate.kind});
         root=normalized.wrapper;
+      }
+      // Preserve a model's manual front correction when switching via the gallery.
+      const prior=recentKey?recentFiles.get(recentKey):
+        [...recentFiles.values()].find((entry)=>entry.file.name===file.name&&
+          entry.file.size===file.size&&entry.file.lastModified===file.lastModified);
+      if(normalized&&prior?.rotation){
+        root.rotation.set(prior.rotation.x,prior.rotation.y,prior.rotation.z);
       }
       const player=candidate.inventory.length
         ?createEmbeddedPlayer(THREE,candidate.model,candidate.clips)
@@ -152,7 +165,7 @@ export function installAvatarLab({
       if(recentKey&&recentFiles.has(recentKey)){selectedKey=recentKey;}
       else{
         const found=[...recentFiles].find(([,entry])=>entry.file.name===file.name&&entry.file.size===file.size&&entry.file.lastModified===file.lastModified);
-        if(found){selectedKey=found[0];recentFiles.set(selectedKey,{file,resources});}
+        if(found){selectedKey=found[0];recentFiles.set(selectedKey,{...found[1],file,resources});}
         else{
           const key='local-'+(++nextRecent);selectedKey=key;
           recentFiles.set(key,{file,resources});
@@ -242,6 +255,11 @@ export function installAvatarLab({
     active.root.rotation.y+=Math.PI/2;
     writeStatus('Orientación del personaje: eje Y +90°.');
   });
+  flipFront.addEventListener('click',()=>{
+    if(active?.mode!=='generic')return;
+    active.root.rotation.y+=Math.PI;
+    writeStatus('Frente invertido 180°; este ajuste se conserva al alternar modelos en la sesión.');
+  });
   rotateZ.addEventListener('click',()=>{
     if(active?.mode!=='generic')return;
     active.root.rotation.z+=Math.PI/2;
@@ -249,8 +267,8 @@ export function installAvatarLab({
   });
   resetRotation.addEventListener('click',()=>{
     if(active?.mode!=='generic')return;
-    active.root.rotation.set(0,0,0);
-    writeStatus('Orientación X/Y/Z restablecida.');
+    active.root.rotation.set(0,active.normalized?.defaultYaw??0,0);
+    writeStatus('Orientación frontal automática restaurada para este modelo.');
   });
   return {
     readyDefault,defaultFailed,
