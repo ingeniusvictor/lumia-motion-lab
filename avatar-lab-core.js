@@ -22,10 +22,11 @@ export function validateAvatarFile(file, maxBytes = AVATAR_MAX_BYTES) {
 }
 export function animationInventory(clips) {
   if (!Array.isArray(clips)) return [];
-  return clips.filter((clip) => clip && Number.isFinite(clip.duration)
-    && clip.duration > 0 && Array.isArray(clip.tracks) && clip.tracks.length > 0)
+  return clips.map((clip, index) => ({clip, index}))
+    .filter(({clip}) => clip && Number.isFinite(clip.duration)
+      && clip.duration > 0 && Array.isArray(clip.tracks) && clip.tracks.length > 0)
     .slice(0, 250)
-    .map((clip, index) => ({
+    .map(({clip, index}) => ({
       index, name: String(clip.name || 'Animación ' + (index + 1)).slice(0, 100),
       seconds: Math.round(clip.duration * 100) / 100, tracks: clip.tracks.length,
     }));
