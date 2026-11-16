@@ -42,6 +42,35 @@ label{display:block;color:#b9d7e0;font-size:12.5px;margin:12px 0 9px}label span{
 <p>Base visual aprobada intacta. Ahora Lumia articula palabras de forma estimada, modula expresiones durante sus respuestas y recibe marcas de visemas del TTS de tu aplicación.</p>
 <div class="info" id="motion-state">Estado actual: En reposo</div>
 
+<section id="avatar-lab-panel">
+<h2>🧍 Motion R9-02 · Cambiar personaje</h2>
+<p>Prueba modelos VRM, GLB o FBX con esqueleto y/o animaciones propias. Se abre desde tu PC y no se sube al servidor.</p>
+<div class="info" id="avatar-current" aria-live="polite">Actual: LUMIA Natural V0.5 · referencia aprobada</div>
+<label for="avatar-model-file">Importar personaje completo (.vrm, .glb, .fbx)</label>
+<input type="file" id="avatar-model-file" accept=".vrm,.glb,.fbx" disabled style="max-width:100%;width:100%;font-size:12px"/>
+<div class="actions" style="margin-top:10px">
+<button type="button" id="avatar-restore" disabled>↶ Restaurar LUMIA original</button>
+<button type="button" id="avatar-frame" disabled>Encuadrar personaje</button>
+</div>
+<div id="avatar-loading" class="info" role="status" aria-live="polite">Cargando el VRM original…</div>
+<small>VRM con rig humanoide: puede usar las pruebas R8/R9. GLB/FBX sin metadatos VRM: vista 3D y reproducción de animaciones internas, sin forzar movimientos sobre un esqueleto desconocido.</small>
+<label for="avatar-animation">Animaciones integradas en el nuevo personaje</label>
+<select id="avatar-animation" disabled style="width:100%;background:#10273a;color:#e8faff;border:1px solid #34566a;border-radius:8px;padding:9px">
+<option value="">Sin clips propios</option>
+</select>
+<label class="convo-check" for="avatar-loop"><input type="checkbox" id="avatar-loop" checked><span>Repetir animación propia</span></label>
+<div class="actions">
+<button type="button" id="avatar-animation-play" disabled>▶ Reproducir</button>
+<button type="button" id="avatar-animation-stop" disabled>■ Detener</button>
+</div>
+<label for="avatar-animation-speed">Velocidad de animación propia <span id="avatar-animation-speed-label">100%</span></label>
+<input type="range" min="25" max="175" step="5" value="100" id="avatar-animation-speed"/>
+<div class="actions" style="margin-top:9px">
+<button type="button" id="avatar-rotate-x" disabled>Girar X +90°</button>
+<button type="button" id="avatar-rotate-y" disabled>Girar Y +90°</button>
+</div>
+<small>La rotación de ejes se ofrece para GLB/FBX; ayuda a corregir personajes exportados acostados. Para cambiar la orientación original del rig VRM se requiere una conversión dedicada.</small>
+</section>
 <section id="conversation-panel"><div class="convo-label"><h2>Conversación en vivo</h2><span class="convo-badge" id="conversation-mode">En reposo</span></div>
 <p>Prueba el ciclo automático <strong>escuchar → pensar → hablar → reposo</strong>. Para activar la IA real hace falta conectar su motor; el modo demo es local.</p>
 <label for="backend-mode">Fuente de respuestas</label>
