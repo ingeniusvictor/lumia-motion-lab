@@ -21,6 +21,7 @@ export function installAvatarLab({
   const loop=$('avatar-loop'),speed=$('avatar-animation-speed');
   const speedLabel=$('avatar-animation-speed-label');
   const rotateX=$('avatar-rotate-x'),rotateY=$('avatar-rotate-y');
+  const rotateZ=$('avatar-rotate-z'),resetRotation=$('avatar-reset-rotation');
   const gallery=$('avatar-session-select'),clearList=$('avatar-clear-list');
   const recentFiles=new Map();let nextRecent=0,selectedKey='original';
   let original=null,active=null,uiTimer=0;
@@ -68,6 +69,8 @@ export function installAvatarLab({
     frame.disabled=false;
     rotateX.disabled=active.mode!=='generic';
     rotateY.disabled=active.mode!=='generic';
+    rotateZ.disabled=active.mode!=='generic';
+    resetRotation.disabled=active.mode!=='generic';
     select.replaceChildren();
     if(!active.inventory.length){
       const option=document.createElement('option');
@@ -238,6 +241,16 @@ export function installAvatarLab({
     if(active?.mode!=='generic')return;
     active.root.rotation.y+=Math.PI/2;
     writeStatus('Orientación del personaje: eje Y +90°.');
+  });
+  rotateZ.addEventListener('click',()=>{
+    if(active?.mode!=='generic')return;
+    active.root.rotation.z+=Math.PI/2;
+    writeStatus('Orientación del personaje: eje Z +90°.');
+  });
+  resetRotation.addEventListener('click',()=>{
+    if(active?.mode!=='generic')return;
+    active.root.rotation.set(0,0,0);
+    writeStatus('Orientación X/Y/Z restablecida.');
   });
   return {
     readyDefault,defaultFailed,
