@@ -1009,16 +1009,35 @@ function setAvatarControlsCompatible(compatible){
     updateDanceButtons();
   }
 }
+// Each avatar retains its original bind quaternions across R8 -> other -> R8 swaps.
+const avatarBindCache=new WeakMap();
 function bindVRMModel(nextVrm,info){
   vrm=nextVrm;headBone=null;
   headOriginalQuaternion.identity();
   bodyBones.clear();boneBaseRotation.clear();
   if(vrm.lookAt)vrm.lookAt.target=lookTarget;
   headBone=vrm.humanoid?.getNormalizedBoneNode?.('head')||null;
-  if(headBone)headOriginalQuaternion.copy(headBone.quaternion);
+  let bind=avatarBindCache.get(vrm);
+  if(!bind){
+    bind=new Map();
+    if(headBone)bind.set('head',headBone.quaternion.clone());
+    for(const name of bodyTargets){
+      const node=vrm.humanoid?.getNormalizedBoneNode?.(name);
+      if(node)bind.set(name,node.quaternion.clone());
+    }
+    avatarBindCache.set(vrm,bind);
+  }
+  if(headBone){
+    headBone.quaternion.copy(bind.get('head')||headBone.quaternion);
+    headOriginalQuaternion.copy(headBone.quaternion);
+  }
   for(const boneName of bodyTargets){
     const node=vrm.humanoid?.getNormalizedBoneNode?.(boneName);
-    if(node){bodyBones.set(boneName,node);boneBaseRotation.set(boneName,node.quaternion.clone());}
+    if(node){
+      if(bind.has(boneName))node.quaternion.copy(bind.get(boneName));
+      bodyBones.set(boneName,node);
+      boneBaseRotation.set(boneName,node.quaternion.clone());
+    }
   }
   for(let i=0;i<55;i++){
     bodyCore.step(.05,config);
@@ -1065,6 +1084,7 @@ const avatarLab=installAvatarLab({
     setCameraPreset(info.mode==='generic'?'full':'bust');
     controls.maxDistance=info.mode==='generic'?15:5;
     updateDanceButtons();
+    if(info.mode==='generic')setAvatarControlsCompatible(false);
   },
   onOwnAnimation:playing=>{if(playing)prepareOwnAvatarAnimation();else motionIntelligence.postpone(elapsed,1);}
 });
