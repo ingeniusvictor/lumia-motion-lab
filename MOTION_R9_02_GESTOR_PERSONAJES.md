@@ -8,7 +8,9 @@ Nueva sección **Motion R9-02 · Cambiar personaje** en el panel derecho del vis
 - **GLB/FBX** genéricos: visor independiente con encuadre normalizado y reproducción de clips propios; no se fuerza el retarget de FBX de Lumia sobre un rig desconocido.
 - **FBX animado**: requiere malla (With Skin) para ser un personaje. Los FBX solo de animaciones (Without Skin) siguen entrando en el panel Mixamo original.
 - **Selector de clips propios**: reproducir, detener, repetir y velocidad.
-- **Rotación X, Y y Z**: girar por pasos de 90 grados y recuperar orientación inicial en FBX/GLB.
+- **Frente automático GLB/FBX**: el visor hace un giro inicial de 180° alrededor del eje Y para compensar modelos exportados con frente +Z, mientras su cámara está en −Z. Esto se aplica exclusivamente al contenedor de la escena, sin modificar rig, animaciones ni el archivo original. Los VRM conservan su orientación nativa.
+- **Botón Invertir frente (180°)**: permite corregir los modelos que ya venían con frente −Z. El botón Restaurar orientación regresa al ajuste automático de ese formato.
+- **Rotación X, Y y Z**: girar por pasos de 90 grados; los ajustes manuales de GLB/FBX se conservan al cambiar entre personajes de la galería durante la sesión. El modelo se centra mediante un pivote separado para que no salga de la cámara al rotar.
 - **Galería temporal**: seleccionar hasta doce modelos cargados durante la misma pestaña, sin tener que buscar su archivo otra vez. El visor libera la GPU del avatar anterior al cambiar y vuelve a analizar el archivo cuando se selecciona.
 - **Restaurar LUMIA Natural V0.5**: el avatar aprobado permanece como referencia original; no se modifica.
 - **Texturas opcionales**: cuando un FBX necesite imágenes externas, el usuario puede seleccionar esas texturas adicionales localmente antes de cargar el modelo. No se hacen peticiones a URL externas incluidas en el archivo.
