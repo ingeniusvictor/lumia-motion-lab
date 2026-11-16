@@ -53,7 +53,7 @@ class FakeBox{
   setFromObject(){return this;}
   isEmpty(){return false;}
   getSize(o){o.x=2;o.y=4;o.z=1;return o;}
-  getCenter(o){o.x=0;o.y=2;o.z=0;return o;}
+  getCenter(o){o.x=2;o.y=2;o.z=-3;return o;}
   get min(){return {y:0};}
 }
 class FakeMixer {
@@ -107,7 +107,9 @@ eq(defaultAvatarFacingYaw('fbx'),Math.PI,'generic FBX points toward -Z camera');
 eq(defaultAvatarFacingYaw('vrm'),0,'approved VRM default front is preserved');
 eq(fitted.defaultYaw,Math.PI,'wrapper stores front-facing default for reset');
 eq(fitted.wrapper.rotation.y,Math.PI,'GLB is turned around at scene wrapper, not on bones');
-eq(fitted.wrapper.children[0],fakeModel,'original skeleton and embedded animations untouched');
+eq(fitted.pivot.position.value,[-2,0,3],'off-center avatar rotates around its body instead of orbiting away');
+eq(fitted.wrapper.position.value,[0,0,0],'outer facing pivot remains centered on scene origin');
+eq(fitted.wrapper.children[0].children[0],fakeModel,'original skeleton and embedded animations untouched');
 const fbxFitted=normalizeGenericAvatar(THREE,fakeModel,{kind:'fbx'});
 eq(fbxFitted.wrapper.rotation.y,Math.PI,'FBX also starts facing viewer');
 const player=createEmbeddedPlayer(THREE,fakeModel,clips.slice(1));
