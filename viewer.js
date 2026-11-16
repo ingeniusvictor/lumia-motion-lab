@@ -15,6 +15,7 @@ import {createCircleWalkController} from './walking-circle.js';
 import {MotionIntelligence} from './motion-intelligence.js';
 import {SemanticMotionCore} from './semantic-motion.js';
 import {R9MotionPilot} from './r9-motion-pilot.js';
+import {installAvatarLab} from './avatar-lab-ui.js';
 import {PoseTransition} from './pose-transition.js';
 import {repairQuaternionMicroSpikes} from './motion-clip-stability.js';
 import {buildDanceRoutine, DanceSequenceClock, prepareDancePlan} from './dance-choreography.js';
@@ -965,37 +966,123 @@ window.addEventListener('pointermove',e=>{
 window.addEventListener('blur',()=>{config.cursorInside=false;});
 document.addEventListener('pointerleave',()=>{config.cursorInside=false;});
 
-const loader = new GLTFLoader();
-loader.register(parser=>new VRMLoaderPlugin(parser));
-loader.load('./LUMIA_VITA_NATURAL_V05.vrm', gltf=>{
-  vrm=gltf.userData.vrm;
-  if(!vrm){ status.textContent='El archivo no se identificó como VRM.'; return; }
-  scene.add(vrm.scene);
-  animFeedback('Avatar listo. 17 movimientos aprobados y compositor libre de hasta 3 clips FBX de baile.');
-  updateDanceButtons();
-  if(vrm.lookAt) vrm.lookAt.target=lookTarget;
-  headBone=vrm.humanoid?.getNormalizedBoneNode?.('head') || null;
-  if(headBone) headOriginalQuaternion.copy(headBone.quaternion);
+// Motion R9-02: the approved R8 avatar remains available as a known-good backup.
+// These swaps never rewrite the private assets, the other LUMIA project or the bridge.
+function beforeAvatarSwap(){
+  ++autoRequestId; ++currentLoadToken; ++danceState.token;
+  autoMotionPending=false;manualLock=false;
+  stopDance({immediate:true});
+  stopMixamo({immediate:true});
+  if(mixamoState.mixer&&vrm){
+    mixamoState.mixer.stopAllAction();
+    mixamoState.mixer.uncacheRoot(vrm.scene);
+  }
+  mixamoState.mixer=null;mixamoState.action=null;mixamoState.active=false;
+  mixamoState.ready=false;mixamoState.clip=null;mixamoState.source=null;
+  mixamoState.origin=null;mixamoState.fadeOutRemaining=0;mixamoState.fadeInRemaining=0;
+  motionCache.clear();selectedFbx=null;
+  poseBridge.clear();bodyCore.clearGestures();semanticMotion.end();r9Motion.clear();
+  activeEmotionWeights.clear();mouthWeights.clear();
+  motionIntelligence.invalidate();
+  window.LUMIAConversation?.stop?.();
+  if(vrm){
+    vrm.scene.position.x-=stageOffsetX;
+    vrm.scene.position.z-=stageOffsetZ;
+    vrm.scene.rotation.y=0;
+  }
+  stageOffsetX=0;stageOffsetZ=0;
+  cameraFollowOffsetX=0;cameraFollowOffsetZ=0;
+  forwardWalkController=null;circleWalkController=null;
+  lastThinkingRepair=null;
+  setBehavior('idle',false);
+}
+function setAvatarControlsCompatible(compatible){
+  const selectors=[
+    '[data-library-clip]','#mixamo-file','#mixamo-play','#dance-files',
+    '#dance-start','#r9-autonomous-enabled','#semantic-enabled'
+  ];
+  for(const selector of selectors){
+    document.querySelectorAll(selector).forEach(el=>{el.disabled=!compatible;});
+  }
+  if(compatible){
+    $('#mixamo-play').disabled=true;
+    updateDanceButtons();
+  }
+}
+function bindVRMModel(nextVrm,info){
+  vrm=nextVrm;headBone=null;
+  headOriginalQuaternion.identity();
+  bodyBones.clear();boneBaseRotation.clear();
+  if(vrm.lookAt)vrm.lookAt.target=lookTarget;
+  headBone=vrm.humanoid?.getNormalizedBoneNode?.('head')||null;
+  if(headBone)headOriginalQuaternion.copy(headBone.quaternion);
   for(const boneName of bodyTargets){
     const node=vrm.humanoid?.getNormalizedBoneNode?.(boneName);
     if(node){bodyBones.set(boneName,node);boneBaseRotation.set(boneName,node.quaternion.clone());}
   }
-  // Position the arms before the avatar's first visible frame, preventing a T-pose flash.
   for(let i=0;i<55;i++){
     bodyCore.step(.05,config);
     presenceCore.step(.05,{...config,...presenceConfig});
   }
   applyBodyPose(bodyCore.step(.001,config),presenceCore.step(.001,{...config,...presenceConfig}));
-  $('#body-availability').textContent=`Huesos corporales disponibles: ${bodyBones.size}/${bodyTargets.length}. Ajuste de pose activo.`;
-  const emInfo=buildExpressionMap(vrm.expressionManager);
-  status.textContent='Lumia cargada. Motion Intelligence v0.8.5 R8 · 17 movimientos + gestos semánticos suaves + compositor de baile.';
-  details.textContent=`VRM v0.5 intacto · Rig corporal intacto · ${headBone?'cabeza activa':'cabeza no disponible'} · ${vrm.lookAt?'mirada VRM activa':'mirada no disponible'} · Estados automáticos y emoción contextual v0.8 · Expresiones: ${emInfo.keys.join(', ')}.`;
-}, progress=>{
-  if(progress.total) status.textContent=`Cargando Lumia… ${Math.round(100*progress.loaded/progress.total)}%`;
+  $('#body-availability').textContent='Huesos VRM disponibles: '+bodyBones.size+'/'+bodyTargets.length+
+    ' · animaciones Motion R8/R9 disponibles según compatibilidad';
+  const expression=buildExpressionMap(vrm.expressionManager);
+  status.textContent=info.name+' cargado · '+(info.isDefault?'VRM aprobado':'VRM de prueba')+
+    ' · motor Motion R8/R9 activo';
+  details.textContent='Rig VRM humanoide '+info.report.humanoidMapped+' huesos clave · expresiones: '+
+    (expression.keys.join(', ')||'ninguna')+' · '+info.inventory.length+' animaciones propias';
+  setAvatarControlsCompatible(true);
+  animFeedback('Avatar VRM cargado. Se han restablecido los clips y poses previos para evitar mezclas de rigs.');
+}
+function bindGenericModel(info){
+  vrm=null;headBone=null;
+  bodyBones.clear();boneBaseRotation.clear();
+  buildExpressionMap(null);
+  setAvatarControlsCompatible(false);
+  $('#body-availability').textContent='Modelo '+info.format.toUpperCase()+
+    ' sin VRM humanoide reconocido. Pueden reproducirse sus clips propios, pero no los gestos R8/R9.';
+  status.textContent='Modelo '+info.name+' cargado · '+info.inventory.length+' animaciones internas';
+  details.textContent='Diagnóstico · '+info.report.meshes+' mallas · '+info.report.skinned+
+    ' skinned meshes · '+info.report.bones+' huesos · '+info.report.morphTargets+
+    ' morph targets. Retarget Motion R8/R9 no habilitado para rig genérico.';
+  updateIntelligenceUI('Personaje no VRM: director R8/R9 suspendido, sin modificar su esqueleto.');
+}
+function prepareOwnAvatarAnimation(){
+  ++autoRequestId;++currentLoadToken;
+  autoMotionPending=false;
+  stopDance({immediate:true});
+  stopMixamo({immediate:true});
+  poseBridge.clear();bodyCore.clearGestures();
+  motionIntelligence.invalidate();
+}
+const avatarLab=installAvatarLab({
+  THREE,GLTFLoader,FBXLoader,VRMLoaderPlugin,scene,
+  beforeSwitch:beforeAvatarSwap,
+  onVRM:bindVRMModel,
+  onGeneric:bindGenericModel,
+  onFrame:info=>{
+    setCameraPreset(info.mode==='generic'?'full':'bust');
+    controls.maxDistance=info.mode==='generic'?15:5;
+    updateDanceButtons();
+  },
+  onOwnAnimation:playing=>{if(playing)prepareOwnAvatarAnimation();else motionIntelligence.postpone(elapsed,1);}
+});
+window.LUMIA_AVATAR={getState:()=>avatarLab.snapshot()};
+const loader = new GLTFLoader();
+loader.register(parser=>new VRMLoaderPlugin(parser));
+loader.load('./LUMIA_VITA_NATURAL_V05.vrm',gltf=>{
+  const original=gltf.userData?.vrm;
+  if(!original)throw Error('El modelo de referencia no contiene metadatos VRM.');
+  avatarLab.readyDefault(original);
+},progress=>{
+  if(progress.total)status.textContent='Cargando LUMIA original… '+
+    Math.round(100*progress.loaded/progress.total)+'%';
 },err=>{
-  console.error(err);
-  status.textContent='No se pudo cargar Lumia. Comprueba que abriste el BAT y tienes internet para las bibliotecas.';
-  details.textContent=String(err);
+  console.error('[Motion R9] VRM de referencia:',err);
+  status.textContent='No se pudo cargar el VRM original; puedes importar otro personaje.';
+  details.textContent=String(err?.message||err);
+  avatarLab.defaultFailed(String(err?.message||err));
 });
 
 let lastTime = 0, elapsed = 0, uiAccum=0;
