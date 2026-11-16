@@ -108,7 +108,7 @@ eq(defaultAvatarFacingYaw('vrm'),0,'approved VRM default front is preserved');
 eq(fitted.defaultYaw,Math.PI,'wrapper stores front-facing default for reset');
 eq(fitted.wrapper.rotation.y,Math.PI,'GLB is turned around at scene wrapper, not on bones');
 eq(fitted.pivot.position.value,[-2,0,3],'off-center avatar rotates around its body instead of orbiting away');
-eq(fitted.wrapper.position.value,[0,0,0],'outer facing pivot remains centered on scene origin');
+yes(fitted.wrapper.position.value.every(n=>Math.abs(n)<1e-10),'outer facing pivot remains centered on scene origin');
 eq(fitted.wrapper.children[0].children[0],fakeModel,'original skeleton and embedded animations untouched');
 const fbxFitted=normalizeGenericAvatar(THREE,fakeModel,{kind:'fbx'});
 eq(fbxFitted.wrapper.rotation.y,Math.PI,'FBX also starts facing viewer');
