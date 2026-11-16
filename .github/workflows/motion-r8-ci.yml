@@ -32,8 +32,8 @@ jobs:
             node "$test"
             count=$((count+1))
           done
-          test "$count" -eq 17
-          echo "PASS $count pruebas sin assets"
+          test "$count" -ge 18
+          echo "PASS $count pruebas sin assets (17 R8 + R9 experimental)"
       - name: Impedir que entren assets 3D en la rama publica
         shell: bash
         run: |

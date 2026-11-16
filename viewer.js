@@ -14,6 +14,8 @@ import {createForwardWalkController} from './walking-forward.js';
 import {createCircleWalkController} from './walking-circle.js';
 import {MotionIntelligence} from './motion-intelligence.js';
 import {SemanticMotionCore} from './semantic-motion.js';
+import {R9MotionPilot} from './r9-motion-pilot.js';
+import {installAvatarLab} from './avatar-lab-ui.js';
 import {PoseTransition} from './pose-transition.js';
 import {repairQuaternionMicroSpikes} from './motion-clip-stability.js';
 import {buildDanceRoutine, DanceSequenceClock, prepareDancePlan} from './dance-choreography.js';
@@ -69,6 +71,7 @@ const mixamoState={mixer:null,action:null,active:false,ready:false,tracks:0,clip
   speed:DEFAULT_CLIP_SPEED, repetitions:1, elapsedSource:0,fadeOutRemaining:0,fadeOutDuration:0.62,fadeInRemaining:0,fadeInDuration:0.55,origin:null};
 const motionIntelligence=new MotionIntelligence({enabled:true,variety:55});
 const semanticMotion=new SemanticMotionCore({enabled:true,intensity:48});
+const r9Motion=new R9MotionPilot({enabled:false,intensity:80});
 const poseBridge=new PoseTransition(.44);
 let poseBlendEnabled=true;
 let conversationEventStatus='Sin eventos de voz';
@@ -77,10 +80,11 @@ window.addEventListener('lumia:speech-motion',event=>{
  const {phase,text,index,id,source}=event.detail||{};
  conversationEventStatus=phase==='start'?`Voz iniciada · ${source} · sesión ${id}`:phase==='boundary'?`Avance de palabra · sesión ${id}`:`Voz finalizada · sesión ${id}`;
  const voiceInfo=$('#r8-voice-status');if(voiceInfo)voiceInfo.textContent=conversationEventStatus;
- if(phase==='start')semanticMotion.begin(text);
- else if(phase==='boundary')semanticMotion.boundary(index);
- else if(phase==='end')semanticMotion.end();
+ if(phase==='start'){semanticMotion.begin(text);r9Motion.begin(text,{sessionId:id});}
+ else if(phase==='boundary'){semanticMotion.boundary(index);r9Motion.boundary(index,id);}
+ else if(phase==='end'){semanticMotion.end();r9Motion.end(id);}
  updateSemanticUI();
+ updateR9UI();
 });
 let manualLock=false,autoMotionPending=false,autoRequestId=0;
 let selectedFbx=null;
@@ -284,6 +288,7 @@ async function loadLibraryClip(key,guard=()=>true){
 }
 function playMixamo({loop=false,repetitions=1}={}){
  if(!mixamoState.ready||!vrm||!mixamoState.action)return false;
+ if(avatarLab.ownsAnimation())avatarLab.stopOwnAnimation();
  if(mixamoState.active||mixamoState.fadeOutRemaining>0)stopMixamo({immediate:true});
  bodyCore.clearGestures();
  const action=mixamoState.action;
@@ -426,6 +431,20 @@ function updateSemanticUI(){
   if(value!==semanticLastStatus){info.textContent=value;semanticLastStatus=value;}
  }
 }
+function updateR9UI(){
+ const s=r9Motion.snapshot();
+ const toggle=$('#r9-autonomous-enabled');if(toggle)toggle.checked=s.enabled;
+ const slider=$('#r9-autonomous-intensity');if(slider)slider.value=String(s.intensity);
+ const label=$('#r9-autonomous-intensity-label');if(label)label.textContent=`${Math.round(s.intensity)}%`;
+ const status=$('#r9-autonomous-status');if(status){
+  status.textContent=!s.enabled?'Comparación R8 activa. R9 apagado.':
+   s.speaking?`R9 en voz · gestos previstos ${s.planned} · ${s.active||s.lastCue||'esperando frase'}`:
+   'R9 listo · activa las pruebas de voz (Sí / No / Explicar / Celebración).';
+ }
+}
+$('#r9-autonomous-enabled').addEventListener('change',event=>{r9Motion.setEnabled(event.target.checked);updateR9UI();});
+$('#r9-autonomous-intensity').addEventListener('input',event=>{r9Motion.setIntensity(Number(event.target.value));updateR9UI();});
+updateR9UI();
 $('#r8-pose-blend').addEventListener('change',event=>{poseBlendEnabled=!!event.target.checked;if(!poseBlendEnabled)poseBridge.clear();});
 $('#semantic-enabled').addEventListener('change',event=>{semanticMotion.setEnabled(event.target.checked);updateSemanticUI();});
 $('#semantic-intensity').addEventListener('input',event=>{semanticMotion.setIntensity(event.target.value);updateSemanticUI();});
@@ -438,7 +457,7 @@ const semanticQuaternion=new THREE.Quaternion();const semanticEuler=new THREE.Eu
 function applySemanticBody(pose){
  for(const [name,value] of Object.entries(pose.body||{})){
   if(!Number.isFinite(value)||Math.abs(value)<.00001)continue;
-  const m=/^(leftUpperArm|rightUpperArm|leftLowerArm|rightLowerArm|chest)(X|Y|Z)$/.exec(name);
+  const m=/^(leftUpperArm|rightUpperArm|leftLowerArm|rightLowerArm|leftHand|rightHand|chest)(X|Y|Z)$/.exec(name);
   if(!m)continue;
   const bone=bodyBones.get(m[1]);if(!bone)continue;
   semanticEuler.set(m[2]==='X'?value:0,m[2]==='Y'?value:0,m[2]==='Z'?value:0);
@@ -447,6 +466,7 @@ function applySemanticBody(pose){
  }
 }
 function interruptAutoForManual(){
+ if(avatarLab.ownsAnimation())avatarLab.stopOwnAnimation();
  autoRequestId++;autoMotionPending=false;motionIntelligence.invalidate();
  ++currentLoadToken;manualLock=true;
  if(mixamoState.origin==='automatic'&&mixamoState.active)stopMixamo();
@@ -463,7 +483,7 @@ async function playManualLibraryClip(key){
  return started;
 }
 function directorTick(){
- if(!vrm||!motionIntelligence.enabled||autoMotionPending||manualLock)return;
+ if(!vrm||avatarLab.ownsAnimation()||!motionIntelligence.enabled||autoMotionPending||manualLock)return;
  const cue=getEmotionCue();
  const intent=motionIntelligence.decide({now:elapsed,state:config.behavior,activeId:mixamoState.source,active:mixamoState.active,
   transitioning:mixamoState.fadeOutRemaining>0,manual:manualLock,pending:autoMotionPending,
@@ -554,7 +574,7 @@ function setBehavior(behavior,manual=true){
   if(previousBehavior==='thinking'&&mixamoState.source==='walkingcircle'&&mixamoState.active&&mixamoState.origin!=='manual')stopMixamo();
   if(motionIntelligence.enabled&&mixamoState.origin==='automatic'&&mixamoState.active&&!manualLock)stopMixamo();
  }
- if(config.behavior!==behavior && !motionIntelligence.enabled && $('#library-auto-talk')?.checked){
+ if(config.behavior!==behavior && !avatarLab.ownsAnimation() && !motionIntelligence.enabled && $('#library-auto-talk')?.checked){
   if(behavior==='speaking' && !mixamoState.active)playLibraryClip('talking',{origin:'legacy'});
   else if(behavior!=='speaking' && mixamoState.active && mixamoState.source==='talking')stopMixamo();
  }
@@ -880,6 +900,9 @@ window.LUMIA_BODY={
   setThinkingGestureDelay(value){motionIntelligence.setThinkingDelay(value);updateIntelligenceUI();return motionIntelligence.thinkingDelay;},
   getMotionIntelligence(){return {...motionIntelligence.snapshot(),presence:{...presenceConfig},semantic:semanticMotion.snapshot(),stability:{...stabilityConfig,thinkingRepair:lastThinkingRepair}};},
   getSemanticMotion(){return semanticMotion.snapshot();},
+  getR9Motion(){return r9Motion.snapshot();},
+  setR9MotionEnabled(v){const result=r9Motion.setEnabled(v);updateR9UI();return result;},
+  setR9MotionIntensity(v){const result=r9Motion.setIntensity(Number(v));updateR9UI();return result;},
   getVoiceSync(){return {event:conversationEventStatus,session:window.LUMIAConversation?.getSpeechSession?.()??null,poseBlendActive:poseBridge.active,poseBlendEnabled};},
   setPoseBlendEnabled(v){poseBlendEnabled=!!v;$('#r8-pose-blend').checked=poseBlendEnabled;if(!poseBlendEnabled)poseBridge.clear();return poseBlendEnabled;},
   setSemanticMotionEnabled(v){semanticMotion.setEnabled(v);updateSemanticUI();return semanticMotion.enabled;},
@@ -945,37 +968,143 @@ window.addEventListener('pointermove',e=>{
 window.addEventListener('blur',()=>{config.cursorInside=false;});
 document.addEventListener('pointerleave',()=>{config.cursorInside=false;});
 
-const loader = new GLTFLoader();
-loader.register(parser=>new VRMLoaderPlugin(parser));
-loader.load('./LUMIA_VITA_NATURAL_V05.vrm', gltf=>{
-  vrm=gltf.userData.vrm;
-  if(!vrm){ status.textContent='El archivo no se identificó como VRM.'; return; }
-  scene.add(vrm.scene);
-  animFeedback('Avatar listo. 17 movimientos aprobados y compositor libre de hasta 3 clips FBX de baile.');
-  updateDanceButtons();
-  if(vrm.lookAt) vrm.lookAt.target=lookTarget;
-  headBone=vrm.humanoid?.getNormalizedBoneNode?.('head') || null;
-  if(headBone) headOriginalQuaternion.copy(headBone.quaternion);
+// Motion R9-02: the approved R8 avatar remains available as a known-good backup.
+// These swaps never rewrite the private assets, the other LUMIA project or the bridge.
+function beforeAvatarSwap(){
+  ++autoRequestId; ++currentLoadToken; ++danceState.token;
+  autoMotionPending=false;manualLock=false;
+  stopDance({immediate:true});
+  stopMixamo({immediate:true});
+  if(mixamoState.mixer&&vrm){
+    mixamoState.mixer.stopAllAction();
+    mixamoState.mixer.uncacheRoot(vrm.scene);
+  }
+  mixamoState.mixer=null;mixamoState.action=null;mixamoState.active=false;
+  mixamoState.ready=false;mixamoState.clip=null;mixamoState.source=null;
+  mixamoState.origin=null;mixamoState.fadeOutRemaining=0;mixamoState.fadeInRemaining=0;
+  motionCache.clear();selectedFbx=null;
+  poseBridge.clear();bodyCore.clearGestures();semanticMotion.end();r9Motion.clear();
+  activeEmotionWeights.clear();mouthWeights.clear();
+  motionIntelligence.invalidate();
+  window.LUMIAConversation?.stop?.();
+  if(vrm){
+    vrm.scene.position.x-=stageOffsetX;
+    vrm.scene.position.z-=stageOffsetZ;
+    vrm.scene.rotation.y=0;
+  }
+  stageOffsetX=0;stageOffsetZ=0;
+  cameraFollowOffsetX=0;cameraFollowOffsetZ=0;
+  forwardWalkController=null;circleWalkController=null;
+  lastThinkingRepair=null;
+  setBehavior('idle',false);
+}
+function setAvatarControlsCompatible(compatible){
+  const selectors=[
+    '[data-library-clip]','#mixamo-file','#mixamo-play','#dance-files',
+    '#dance-start','#r9-autonomous-enabled','#semantic-enabled'
+  ];
+  for(const selector of selectors){
+    document.querySelectorAll(selector).forEach(el=>{el.disabled=!compatible;});
+  }
+  if(compatible){
+    $('#mixamo-play').disabled=true;
+    updateDanceButtons();
+  }
+}
+// Each avatar retains its original bind quaternions across R8 -> other -> R8 swaps.
+const avatarBindCache=new WeakMap();
+function bindVRMModel(nextVrm,info){
+  vrm=nextVrm;headBone=null;
+  headOriginalQuaternion.identity();
+  bodyBones.clear();boneBaseRotation.clear();
+  if(vrm.lookAt)vrm.lookAt.target=lookTarget;
+  headBone=vrm.humanoid?.getNormalizedBoneNode?.('head')||null;
+  let bind=avatarBindCache.get(vrm);
+  if(!bind){
+    bind=new Map();
+    if(headBone)bind.set('head',headBone.quaternion.clone());
+    for(const name of bodyTargets){
+      const node=vrm.humanoid?.getNormalizedBoneNode?.(name);
+      if(node)bind.set(name,node.quaternion.clone());
+    }
+    avatarBindCache.set(vrm,bind);
+  }
+  if(headBone){
+    headBone.quaternion.copy(bind.get('head')||headBone.quaternion);
+    headOriginalQuaternion.copy(headBone.quaternion);
+  }
   for(const boneName of bodyTargets){
     const node=vrm.humanoid?.getNormalizedBoneNode?.(boneName);
-    if(node){bodyBones.set(boneName,node);boneBaseRotation.set(boneName,node.quaternion.clone());}
+    if(node){
+      if(bind.has(boneName))node.quaternion.copy(bind.get(boneName));
+      bodyBones.set(boneName,node);
+      boneBaseRotation.set(boneName,node.quaternion.clone());
+    }
   }
-  // Position the arms before the avatar's first visible frame, preventing a T-pose flash.
   for(let i=0;i<55;i++){
     bodyCore.step(.05,config);
     presenceCore.step(.05,{...config,...presenceConfig});
   }
   applyBodyPose(bodyCore.step(.001,config),presenceCore.step(.001,{...config,...presenceConfig}));
-  $('#body-availability').textContent=`Huesos corporales disponibles: ${bodyBones.size}/${bodyTargets.length}. Ajuste de pose activo.`;
-  const emInfo=buildExpressionMap(vrm.expressionManager);
-  status.textContent='Lumia cargada. Motion Intelligence v0.8.5 R8 · 17 movimientos + gestos semánticos suaves + compositor de baile.';
-  details.textContent=`VRM v0.5 intacto · Rig corporal intacto · ${headBone?'cabeza activa':'cabeza no disponible'} · ${vrm.lookAt?'mirada VRM activa':'mirada no disponible'} · Estados automáticos y emoción contextual v0.8 · Expresiones: ${emInfo.keys.join(', ')}.`;
-}, progress=>{
-  if(progress.total) status.textContent=`Cargando Lumia… ${Math.round(100*progress.loaded/progress.total)}%`;
+  $('#body-availability').textContent='Huesos VRM disponibles: '+bodyBones.size+'/'+bodyTargets.length+
+    ' · animaciones Motion R8/R9 disponibles según compatibilidad';
+  const expression=buildExpressionMap(vrm.expressionManager);
+  status.textContent=info.name+' cargado · '+(info.isDefault?'VRM aprobado':'VRM de prueba')+
+    ' · motor Motion R8/R9 activo';
+  details.textContent='Rig VRM humanoide '+info.report.humanoidMapped+' huesos clave · expresiones: '+
+    (expression.keys.join(', ')||'ninguna')+' · '+info.inventory.length+' animaciones propias';
+  setAvatarControlsCompatible(true);
+  animFeedback('Avatar VRM cargado. Se han restablecido los clips y poses previos para evitar mezclas de rigs.');
+}
+function bindGenericModel(info){
+  vrm=null;headBone=null;
+  bodyBones.clear();boneBaseRotation.clear();
+  buildExpressionMap(null);
+  setAvatarControlsCompatible(false);
+  $('#body-availability').textContent='Modelo '+info.format.toUpperCase()+
+    ' sin VRM humanoide reconocido. Pueden reproducirse sus clips propios, pero no los gestos R8/R9.';
+  status.textContent='Modelo '+info.name+' cargado · '+info.inventory.length+' animaciones internas';
+  details.textContent='Diagnóstico · '+info.report.meshes+' mallas · '+info.report.skinned+
+    ' skinned meshes · '+info.report.bones+' huesos · '+info.report.morphTargets+
+    ' morph targets. Retarget Motion R8/R9 no habilitado para rig genérico.';
+  updateIntelligenceUI('Personaje no VRM: director R8/R9 suspendido, sin modificar su esqueleto.');
+}
+function prepareOwnAvatarAnimation(){
+  ++autoRequestId;++currentLoadToken;
+  autoMotionPending=false;
+  stopDance({immediate:true});
+  stopMixamo({immediate:true});
+  poseBridge.clear();bodyCore.clearGestures();
+  motionIntelligence.invalidate();
+}
+const avatarLab=installAvatarLab({
+  THREE,GLTFLoader,FBXLoader,VRMLoaderPlugin,scene,
+  beforeSwitch:beforeAvatarSwap,
+  onVRM:bindVRMModel,
+  onGeneric:bindGenericModel,
+  onFrame:info=>{
+    setCameraPreset(info.mode==='generic'?'full':'bust');
+    controls.maxDistance=info.mode==='generic'?15:5;
+    updateDanceButtons();
+    if(info.mode==='generic')setAvatarControlsCompatible(false);
+  },
+  onOwnAnimation:playing=>{if(playing)prepareOwnAvatarAnimation();else motionIntelligence.postpone(elapsed,1);}
+});
+window.LUMIA_AVATAR={getState:()=>avatarLab.snapshot()};
+const loader = new GLTFLoader();
+loader.register(parser=>new VRMLoaderPlugin(parser));
+loader.load('./LUMIA_VITA_NATURAL_V05.vrm',gltf=>{
+  const original=gltf.userData?.vrm;
+  if(!original)throw Error('El modelo de referencia no contiene metadatos VRM.');
+  avatarLab.readyDefault(original);
+},progress=>{
+  if(progress.total)status.textContent='Cargando LUMIA original… '+
+    Math.round(100*progress.loaded/progress.total)+'%';
 },err=>{
-  console.error(err);
-  status.textContent='No se pudo cargar Lumia. Comprueba que abriste el BAT y tienes internet para las bibliotecas.';
-  details.textContent=String(err);
+  console.error('[Motion R9] VRM de referencia:',err);
+  status.textContent='No se pudo cargar el VRM original; puedes importar otro personaje.';
+  details.textContent=String(err?.message||err);
+  avatarLab.defaultFailed(String(err?.message||err));
 });
 
 let lastTime = 0, elapsed = 0, uiAccum=0;
@@ -992,7 +1121,7 @@ function renderFrame(now) {
   const dt = lastTime ? Math.min((now-lastTime)/1000,0.05) : 0.016;
   lastTime=now;
   elapsed += dt;
-  if(!motionIntelligence.enabled && circleWalkAuto && config.behavior==='thinking' && !thinkingAutoTriggered && !thinkingAutoPending && elapsed-thinkingSince>4 && !mixamoState.active){
+  if(vrm && !avatarLab.ownsAnimation() && !motionIntelligence.enabled && circleWalkAuto && config.behavior==='thinking' && !thinkingAutoTriggered && !thinkingAutoPending && elapsed-thinkingSince>4 && !mixamoState.active){
     thinkingAutoPending=true;
     playLibraryClip('walkingcircle',{origin:'legacy'}).then(started=>{thinkingAutoTriggered=!!started;thinkingAutoPending=false;
       if(started && config.behavior!=='thinking')stopMixamo();
@@ -1008,7 +1137,7 @@ function renderFrame(now) {
   const state = core.step(dt, config);
   const bodyState = bodyCore.step(dt,config);
   const presenceState = presenceCore.step(dt,{...config,...presenceConfig});
-  if(vrm) {
+  if(vrm && !avatarLab.ownsAnimation()) {
     const manager=vrm.expressionManager;
     if(manager) {
       for(const name of ['aa','ee','ih','oh','ou','blink','blinkLeft','blinkRight']){
@@ -1062,7 +1191,10 @@ function renderFrame(now) {
       }
     }
     updateDanceFrame(dt);
-    const semanticPose=semanticMotion.step(dt,{speaking:config.behavior==='speaking'&&motionIntelligence.enabled,manual:manualLock,dancing:danceState.active||danceState.loading});
+    const speechMotionOpts={speaking:config.behavior==='speaking'&&motionIntelligence.enabled,manual:manualLock,dancing:danceState.active||danceState.loading};
+    const r8SemanticPose=semanticMotion.step(dt,speechMotionOpts);
+    const r9SemanticPose=r9Motion.step(dt,speechMotionOpts);
+    const semanticPose=r9Motion.enabled?r9SemanticPose:r8SemanticPose;
     if(semanticPose.kind&&!danceState.active&&!manualLock)applySemanticBody(semanticPose);
     // Frame-last pose bridge: respects new FBX or procedural pose and avoids a T-pose flash.
     if(!danceState.active && !danceState.loading && poseBlendEnabled)poseBridge.step(dt);
@@ -1074,14 +1206,24 @@ function renderFrame(now) {
       headBone.quaternion.copy(headOriginalQuaternion).multiply(localDelta);
     }
     vrm.update(dt);
+    avatarLab.step(dt);
+  }else if(vrm){
+    // An embedded VRM clip owns the rig during playback. Never add R8/R9 bones over it.
+    avatarLab.step(dt);
+    vrm.update(dt);
+  }else{
+    // Generic GLB/FBX has its own mixer and does not receive VRM retargeted FBX.
+    avatarLab.step(dt);
   }
   controls.update();
   renderer.render(scene,camera);
   uiAccum+=dt;
   if(uiAccum>.35) {
     uiAccum=0;
+    updateR9UI();
     runtimeState.textContent = vrm ?
-      `${behaviorLabels[state.behavior][0]} · ojos X ${Math.round(state.gazeX*100)} / Y ${Math.round(state.gazeY*100)} · cabeza ${Math.round(state.headYaw*180/Math.PI)}° horizontal / ${Math.round(state.headPitch*180/Math.PI)}° vertical · parpadeos ${state.blinkCount}` : 'Modelo en carga';
+      `${behaviorLabels[state.behavior][0]} · ojos X ${Math.round(state.gazeX*100)} / Y ${Math.round(state.gazeY*100)} · cabeza ${Math.round(state.headYaw*180/Math.PI)}° horizontal / ${Math.round(state.headPitch*180/Math.PI)}° vertical · parpadeos ${state.blinkCount}` :
+      avatarLab.isGeneric()?'Personaje GLB/FBX · visor de animaciones propias · sin retarget VRM':'Modelo en carga';
   }
 }
 requestAnimationFrame(renderFrame);

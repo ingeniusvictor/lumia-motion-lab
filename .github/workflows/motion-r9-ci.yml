@@ -1,0 +1,52 @@
+name: Motion R9 - portal independiente y limites seguros
+on:
+  push:
+    branches:
+      - feat/motion-r9-independent-lab-20261114
+  pull_request:
+    branches:
+      - feat/motion-r8-source-20261101
+permissions:
+  contents: read
+jobs:
+  isolated-r9:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: R8/R9 motion-only tests
+        run: |
+          node --check viewer.js
+          node --check r9-motion-pilot.js
+          node --check r9/intent-contract.js
+          node --check r9/spoken-director.js
+          node --check r9/expressive-blend.js
+          node --check avatar-lab-core.js
+          node --check avatar-lab-viewer.js
+          node --check avatar-lab-ui.js
+          node test-avatar-lab-r9.mjs
+          node test-semantic-motion-r7.mjs
+          node test-motion-r8.mjs
+          node test-motion-r9.mjs
+      - name: Verificar la frontera del laboratorio y el selector de portal
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $html=Get-Content index.html -Raw
+          $viewer=Get-Content viewer.js -Raw
+          if (-not $html.Contains('id="r9-autonomous-enabled"')) { throw 'Falta selector R9' }
+          if (-not $html.Contains('id="r9-autonomous-intensity"')) { throw 'Falta intensidad R9' }
+          if (-not $viewer.Contains("r9Motion.step(dt,speechMotionOpts)")) { throw 'Falta integracion R9 en el visor R8' }
+          if (-not $html.Contains('id="avatar-model-file"')) { throw 'Falta importador de personaje' }
+          if (-not $html.Contains('id="avatar-restore"')) { throw 'Falta recuperar modelo aprobado' }
+          if (-not $viewer.Contains('avatarLab.step(dt)')) { throw 'Falta actualizar animaciones GLB/FBX en fotogramas' }
+          if (-not (Test-Path PREPARAR_LUMIA_MOTION_R9_LAB.ps1)) { throw 'Falta launcher independiente' }
+          $private = @(git ls-files | Where-Object { $_ -match '\.(fbx|vrm|glb|zip)$' })
+          if ($private.Count -gt 0) { throw "Recursos 3D privados en Git: $private" }
+          Write-Host 'PASS · Motion Lab independiente · sin assets privados en repositorio'
