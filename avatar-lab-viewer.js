@@ -1,44 +1,66 @@
 /**
  * Motion R9-02 browser-only avatar parsing and embedded animation playback.
  * No server upload or execution. Standalone binary VRM/GLB/FBX is supported.
- * External textures/sidecars are explicitly rejected for this first version.
+ * Optional external textures resolve only to owner-selected sidecar files; never to remote URLs.
  */
 import {avatarRigReport,animationInventory,validateAvatarFile} from './avatar-lab-core.js';
 
-function privateAssetManager(THREE) {
+function privateAssetManager(THREE,sidecars,createdUrls) {
   const manager = new THREE.LoadingManager();
+  const selected=new Map();
+  const resolved=new Map();
+  for(const file of sidecars){
+    if(!/\.(?:png|jpg|jpeg|webp|bmp)$/i.test(file.name))continue;
+    selected.set(file.name.toLowerCase(),file);
+  }
   manager.setURLModifier((url) => {
-    // The three.js parsers create blob: URLs for images embedded in the file.
+    // The three.js parsers create blob: URLs for images embedded in the model.
     if (/^(?:data:|blob:)/i.test(url)) return url;
-    throw new Error('Este modelo necesita texturas o archivos externos. Exporta VRM/GLB autocontenido o FBX con texturas incrustadas.');
+    let basename=String(url).split(/[\\/]/).pop().split(/[?#]/)[0];
+    try{basename=decodeURIComponent(basename);}catch{}
+    const key=basename.toLowerCase();
+    const local=selected.get(key);
+    if(!local){
+      throw new Error('Falta textura externa '+basename+'. Selecciónala en "Texturas adicionales" antes de cargar el FBX.');
+    }
+    if(!resolved.has(key)){
+      const objectUrl=URL.createObjectURL(local);
+      resolved.set(key,objectUrl);createdUrls.push(objectUrl);
+    }
+    return resolved.get(key);
   });
   return manager;
 }
-
-export async function parseLocalAvatar(file, {THREE,GLTFLoader,FBXLoader,VRMLoaderPlugin}) {
+export async function parseLocalAvatar(file, {THREE,GLTFLoader,FBXLoader,VRMLoaderPlugin,resources=[]}) {
   const info=validateAvatarFile(file);
-  const buffer=await file.arrayBuffer();
-  let model,vrm=null,clips=[];
-  if(info.kind==='fbx') {
-    const loader=new FBXLoader(privateAssetManager(THREE));
-    model=loader.parse(buffer,'');
-    clips=model.animations||[];
-  }else{
-    const loader=new GLTFLoader(privateAssetManager(THREE));
-    loader.register((parser)=>new VRMLoaderPlugin(parser));
-    const gltf=await loader.parseAsync(buffer,'');
-    vrm=gltf.userData?.vrm||null;
-    model=vrm?.scene||gltf.scene;
-    clips=gltf.animations||[];
-  }
-  if(!model)throw new Error('El archivo no contiene una escena 3D.');
-  const report=avatarRigReport(model,vrm);
-  if(info.kind==='fbx' && report.meshes===0)
-    throw new Error('El FBX solo contiene animaciones/huesos y no tiene malla. Exporta FBX With Skin para usarlo como personaje.');
-  if(report.meshes===0)
-    throw new Error('El archivo no tiene ninguna malla visible.');
-  return {info,model,vrm,clips,inventory:animationInventory(clips),report,
-    kind:vrm?'vrm':info.kind};
+  const textureUrls=[];
+  const releaseSidecars=()=>{
+    for(const url of textureUrls.splice(0))URL.revokeObjectURL(url);
+  };
+  try {
+    const buffer=await file.arrayBuffer();
+    let model,vrm=null,clips=[];
+    if(info.kind==='fbx') {
+      const loader=new FBXLoader(privateAssetManager(THREE,resources,textureUrls));
+      model=loader.parse(buffer,'');
+      clips=model.animations||[];
+    }else{
+      const loader=new GLTFLoader(privateAssetManager(THREE,resources,textureUrls));
+      loader.register((parser)=>new VRMLoaderPlugin(parser));
+      const gltf=await loader.parseAsync(buffer,'');
+      vrm=gltf.userData?.vrm||null;
+      model=vrm?.scene||gltf.scene;
+      clips=gltf.animations||[];
+    }
+    if(!model)throw new Error('El archivo no contiene una escena 3D.');
+    const report=avatarRigReport(model,vrm);
+    if(info.kind==='fbx' && report.meshes===0)
+      throw new Error('El FBX solo contiene animaciones/huesos y no tiene malla. Exporta FBX With Skin para usarlo como personaje.');
+    if(report.meshes===0)
+      throw new Error('El archivo no tiene ninguna malla visible.');
+    return {info,model,vrm,clips,inventory:animationInventory(clips),report,
+      kind:vrm?'vrm':info.kind,releaseSidecars};
+  }catch(err){releaseSidecars();throw err;}
 }
 
 export function normalizeGenericAvatar(THREE,model) {
