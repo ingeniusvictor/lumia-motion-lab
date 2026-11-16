@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {avatarFileKind,validateAvatarFile,animationInventory,avatarRigReport,AvatarLoadGate} from './avatar-lab-core.js';
-import {parseLocalAvatar,normalizeGenericAvatar,createEmbeddedPlayer} from './avatar-lab-viewer.js';
+import {parseLocalAvatar,normalizeGenericAvatar,defaultAvatarFacingYaw,createEmbeddedPlayer} from './avatar-lab-viewer.js';
 let checks=0;
 const eq=(got,want,msg)=>{checks++;assert.deepEqual(got,want,msg);};
 const yes=(v,msg)=>{checks++;assert(v,msg);};
@@ -43,7 +43,7 @@ class FakeGLTF {constructor(mgr){this.manager=mgr;}register(){return this;}
   async parseAsync(){return {scene:fakeModel,userData:{},animations:clips.slice(1)};}}
 class FakeFBX {constructor(mgr){this.manager=mgr;}parse(){return fakeModel;}}
 class FakeGroup {
-  constructor(){this.children=[];this.scale={setScalar(v){this.value=v;}};this.position={set(x,y,z){this.value=[x,y,z];}};}
+  constructor(){this.children=[];this.scale={setScalar(v){this.value=v;}};this.position={set(x,y,z){this.value=[x,y,z];}};this.rotation={x:0,y:0,z:0,set(x,y,z){this.x=x;this.y=y;this.z=z;}};}
   add(obj){this.children.push(obj);}
 }
 class FakeVector{
@@ -99,9 +99,17 @@ eq(glb.inventory.length,2);
 eq(glb.report.vrmHumanoid,false);
 const fbx=await parseLocalAvatar(fakeFile('character.fbx'),opts);
 eq(fbx.kind,'fbx');
-const fitted=normalizeGenericAvatar(THREE,fakeModel);
+const fitted=normalizeGenericAvatar(THREE,fakeModel,{kind:'glb'});
 yes(Math.abs(fitted.scale-.4375)<1e-5,'uniform fit from height');
 eq(fitted.bounds.y,1.75);
+eq(defaultAvatarFacingYaw('glb'),Math.PI,'generic GLB points toward -Z camera');
+eq(defaultAvatarFacingYaw('fbx'),Math.PI,'generic FBX points toward -Z camera');
+eq(defaultAvatarFacingYaw('vrm'),0,'approved VRM default front is preserved');
+eq(fitted.defaultYaw,Math.PI,'wrapper stores front-facing default for reset');
+eq(fitted.wrapper.rotation.y,Math.PI,'GLB is turned around at scene wrapper, not on bones');
+eq(fitted.wrapper.children[0],fakeModel,'original skeleton and embedded animations untouched');
+const fbxFitted=normalizeGenericAvatar(THREE,fakeModel,{kind:'fbx'});
+eq(fbxFitted.wrapper.rotation.y,Math.PI,'FBX also starts facing viewer');
 const player=createEmbeddedPlayer(THREE,fakeModel,clips.slice(1));
 yes(player.play(0,{loop:true,speed:1}),'embedded clip plays');
 player.step(.016);
@@ -110,4 +118,4 @@ yes(player.togglePause(),'pause embedded clip');
 player.stop();
 eq(player.snapshot().playing,false,'restore playback state');
 player.dispose();
-console.log('Motion R9-02 avatar switcher: '+checks+' checks PASS; VRM/GLB/FBX policy, rig, async races, playback and fit.');
+console.log('Motion R9-02 avatar switcher: '+checks+' checks PASS; orientation, VRM/GLB/FBX policy, rig, async races, playback and fit.');
