@@ -63,7 +63,12 @@ export async function parseLocalAvatar(file, {THREE,GLTFLoader,FBXLoader,VRMLoad
   }catch(err){releaseSidecars();throw err;}
 }
 
-export function normalizeGenericAvatar(THREE,model) {
+// The independent portal camera sits at -Z. Common GLB/FBX humanoids face +Z.
+ // This is a viewer-only yaw, not a modification of source bones or animations.
+export function defaultAvatarFacingYaw(kind) {
+  return kind === 'glb' || kind === 'fbx' ? Math.PI : 0;
+}
+export function normalizeGenericAvatar(THREE,model,{kind='glb'}={}) {
   model.updateMatrixWorld(true);
   const box=new THREE.Box3().setFromObject(model);
   if(box.isEmpty())throw new Error('No se encontraron límites visuales para encuadrar el personaje.');
@@ -81,7 +86,10 @@ export function normalizeGenericAvatar(THREE,model) {
   wrapper.add(model);
   wrapper.scale.setScalar(scale);
   wrapper.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);
-  return {wrapper,scale,bounds:{x:size.x*scale,y:size.y*scale,z:size.z*scale}};
+  // The wrapper changes the visible facing direction without touching the rig.
+  const defaultYaw=defaultAvatarFacingYaw(kind);
+  wrapper.rotation.y=defaultYaw;
+  return {wrapper,scale,defaultYaw,bounds:{x:size.x*scale,y:size.y*scale,z:size.z*scale}};
 }
 
 export function createEmbeddedPlayer(THREE,root,clips) {
