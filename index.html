@@ -74,10 +74,12 @@ label{display:block;color:#b9d7e0;font-size:12.5px;margin:12px 0 9px}label span{
 </div>
 <label for="avatar-animation-speed">Velocidad de animación propia <span id="avatar-animation-speed-label">100%</span></label>
 <input type="range" min="25" max="175" step="5" value="100" id="avatar-animation-speed"/>
-<div class="actions" style="margin-top:9px">
+<div class="actions triple" style="margin-top:9px">
 <button type="button" id="avatar-rotate-x" disabled>Girar X +90°</button>
 <button type="button" id="avatar-rotate-y" disabled>Girar Y +90°</button>
+<button type="button" id="avatar-rotate-z" disabled>Girar Z +90°</button>
 </div>
+<button type="button" id="avatar-reset-rotation" disabled style="width:100%;margin-top:8px">Restablecer orientación del modelo</button>
 <small>La rotación de ejes se ofrece para GLB/FBX; ayuda a corregir personajes exportados acostados. Para cambiar la orientación original del rig VRM se requiere una conversión dedicada.</small>
 </section>
 <section id="conversation-panel"><div class="convo-label"><h2>Conversación en vivo</h2><span class="convo-badge" id="conversation-mode">En reposo</span></div>
