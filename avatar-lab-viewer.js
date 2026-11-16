@@ -81,15 +81,21 @@ export function normalizeGenericAvatar(THREE,model,{kind='glb'}={}) {
     2/Math.max(size.x,1e-5),2/Math.max(size.z,1e-5));
   if(!Number.isFinite(scale)||scale<1e-7||scale>1e7)
     throw new Error('La escala del modelo no es utilizable.');
+  // Separate centering from facing: model animations keep their own root rig;
+  // turning the outer wrapper cannot displace an off-origin model sideways.
   const wrapper=new THREE.Group();
   wrapper.name='MotionR9LocalAvatarWrapper';
-  wrapper.add(model);
+  const pivot=new THREE.Group();
+  pivot.name='MotionR9AvatarCenteringPivot';
+  pivot.position.set(-center.x,0,-center.z);
+  pivot.add(model);
+  wrapper.add(pivot);
   wrapper.scale.setScalar(scale);
-  wrapper.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);
+  wrapper.position.set(0,-box.min.y*scale,0);
   // The wrapper changes the visible facing direction without touching the rig.
   const defaultYaw=defaultAvatarFacingYaw(kind);
   wrapper.rotation.y=defaultYaw;
-  return {wrapper,scale,defaultYaw,bounds:{x:size.x*scale,y:size.y*scale,z:size.z*scale}};
+  return {wrapper,pivot,scale,defaultYaw,bounds:{x:size.x*scale,y:size.y*scale,z:size.z*scale}};
 }
 
 export function createEmbeddedPlayer(THREE,root,clips) {
