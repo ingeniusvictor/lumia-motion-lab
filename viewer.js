@@ -288,6 +288,7 @@ async function loadLibraryClip(key,guard=()=>true){
 }
 function playMixamo({loop=false,repetitions=1}={}){
  if(!mixamoState.ready||!vrm||!mixamoState.action)return false;
+ if(avatarLab.ownsAnimation())avatarLab.stopOwnAnimation();
  if(mixamoState.active||mixamoState.fadeOutRemaining>0)stopMixamo({immediate:true});
  bodyCore.clearGestures();
  const action=mixamoState.action;
@@ -465,6 +466,7 @@ function applySemanticBody(pose){
  }
 }
 function interruptAutoForManual(){
+ if(avatarLab.ownsAnimation())avatarLab.stopOwnAnimation();
  autoRequestId++;autoMotionPending=false;motionIntelligence.invalidate();
  ++currentLoadToken;manualLock=true;
  if(mixamoState.origin==='automatic'&&mixamoState.active)stopMixamo();
@@ -572,7 +574,7 @@ function setBehavior(behavior,manual=true){
   if(previousBehavior==='thinking'&&mixamoState.source==='walkingcircle'&&mixamoState.active&&mixamoState.origin!=='manual')stopMixamo();
   if(motionIntelligence.enabled&&mixamoState.origin==='automatic'&&mixamoState.active&&!manualLock)stopMixamo();
  }
- if(config.behavior!==behavior && !motionIntelligence.enabled && $('#library-auto-talk')?.checked){
+ if(config.behavior!==behavior && !avatarLab.ownsAnimation() && !motionIntelligence.enabled && $('#library-auto-talk')?.checked){
   if(behavior==='speaking' && !mixamoState.active)playLibraryClip('talking',{origin:'legacy'});
   else if(behavior!=='speaking' && mixamoState.active && mixamoState.source==='talking')stopMixamo();
  }
