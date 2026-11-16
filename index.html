@@ -54,6 +54,9 @@ label{display:block;color:#b9d7e0;font-size:12.5px;margin:12px 0 9px}label span{
 <button type="button" id="avatar-clear-list" disabled style="width:100%;margin-top:8px">Vaciar lista y volver al original</button>
 <label for="avatar-model-file">Importar personaje completo (.vrm, .glb, .fbx)</label>
 <input type="file" id="avatar-model-file" accept=".vrm,.glb,.fbx" disabled style="max-width:100%;width:100%;font-size:12px"/>
+<label for="avatar-extra-files">Texturas adicionales para FBX (opcional)</label>
+<input type="file" id="avatar-extra-files" accept=".png,.jpg,.jpeg,.webp,.bmp" multiple style="max-width:100%;width:100%;font-size:12px"/>
+<small>Si un FBX depende de imágenes externas, selecciónalas aquí antes de cargar el personaje. Los recursos se leen únicamente desde el navegador.</small>
 <div class="actions" style="margin-top:10px">
 <button type="button" id="avatar-restore" disabled>↶ Restaurar LUMIA original</button>
 <button type="button" id="avatar-frame" disabled>Encuadrar personaje</button>
